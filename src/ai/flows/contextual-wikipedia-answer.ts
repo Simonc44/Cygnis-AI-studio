@@ -23,6 +23,12 @@ const ContextualWikipediaAnswerOutputSchema = z.object({
 export type ContextualWikipediaAnswerOutput = z.infer<typeof ContextualWikipediaAnswerOutputSchema>;
 
 export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswerInput): Promise<ContextualWikipediaAnswerOutput> {
+  if (input.question.toLowerCase().trim().includes('who are you')) {
+    return {
+      answer: 'I am Cygnis A1, an expert assistant AI. I can answer questions using contextual knowledge from various sources.',
+      sources: ['Internal knowledge'],
+    };
+  }
   return contextualWikipediaAnswerFlow(input);
 }
 
