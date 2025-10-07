@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "analytics_requests",
+      "description": "Abstract visualization of data requests",
+      "imageUrl": "https://picsum.photos/seed/101/600/400",
+      "imageHint": "data network"
+    },
+    {
+      "id": "analytics_speed",
+      "description": "Abstract visualization of speed",
+      "imageUrl": "https://picsum.photos/seed/102/600/400",
+      "imageHint": "speed motion"
+    },
+    {
+      "id": "analytics_errors",
+      "description": "Abstract visualization of system errors",
+      "imageUrl": "https://picsum.photos/seed/103/600/400",
+      "imageHint": "glitch warning"
+    },
+    {
+      "id": "analytics_cost",
+      "description": "Abstract visualization of cost savings",
+      "imageUrl": "https://picsum.photos/seed/104/600/400",
+      "imageHint": "finance chart"
+    }
+  ]
 }
