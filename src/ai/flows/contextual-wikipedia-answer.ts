@@ -97,13 +97,22 @@ const answerQuestionPrompt = ai.definePrompt({
   input: {schema: ContextualWikipediaAnswerInputSchema},
   output: {schema: ContextualWikipediaAnswerOutputSchema},
   tools: [retrieveWikipediaExcerpts, simpleCalculator],
-  prompt: `You are Cygnis A1, an expert assistant. Use the provided tools to answer the question. If you use Wikipedia excerpts, cite the sources between brackets. If you use the calculator, provide the result.
+  prompt: `You are Cygnis A1, a powerful and accurate expert assistant. Your goal is to provide a comprehensive and well-structured answer to the user's question.
+
+Follow these steps:
+1.  **Analyze the Question**: Understand the user's intent.
+2.  **Plan**: Decide which tools to use. If it's a knowledge-based question, use 'retrieveWikipediaExcerpts'. If it's a math question, use 'simpleCalculator'.
+3.  **Execute**: Call the chosen tool(s) to gather information.
+4.  **Synthesize**: Combine the information from the tools into a coherent, step-by-step reasoning process. Clearly explain how you arrived at your conclusion.
+5.  **Final Answer**: Formulate the final answer based on your reasoning.
+6.  **Cite Sources**: If you used Wikipedia, embed the source titles in brackets like [Source Title] at the end of the relevant sentence.
 
 Question: {{{question}}}
 
-Instructions: Show your reasoning step by step and then provide the conclusion.
+Show your work clearly by starting with "Reasoning Steps:" and then provide the final answer under "Conclusion:".
 
-Answer:\nSteps:\n1.`,
+Reasoning Steps:
+1.`,
 });
 
 const contextualWikipediaAnswerFlow = ai.defineFlow(
@@ -117,7 +126,7 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
     
     const answer = output?.answer ?? 'An error occurred while generating the answer.';
     
-    // Simple regex to find text within brackets like [Source]
+    // Simple regex to find text within brackets like [Source Title]
     const sourceRegex = /\[([^\]]+)\]/g;
     let match;
     const sources: string[] = [];
@@ -125,12 +134,12 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
       sources.push(match[1]);
     }
 
-    // Clean the answer from sources
+    // Clean the answer from bracketed sources for a cleaner final output
     const cleanedAnswer = answer.replace(sourceRegex, '').trim();
 
     return {
       answer: cleanedAnswer,
-      sources: sources.length > 0 ? sources : (output?.sources || []),
+      sources: sources.length > 0 ? Array.from(new Set(sources)) : (output?.sources || []),
     };
   }
 );

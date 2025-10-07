@@ -11,12 +11,12 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const ImproveAnswerFluencyInputSchema = z.object({
-  rawAnswer: z.string().describe('The raw answer to be polished.'),
+  rawAnswer: z.string().describe('The raw, unpolished answer from a previous step, which may include reasoning and a final conclusion.'),
 });
 export type ImproveAnswerFluencyInput = z.infer<typeof ImproveAnswerFluencyInputSchema>;
 
 const ImproveAnswerFluencyOutputSchema = z.object({
-  polishedAnswer: z.string().describe('The polished answer with improved fluency and coherence.'),
+  polishedAnswer: z.string().describe('The polished, final answer, presented clearly and professionally.'),
 });
 export type ImproveAnswerFluencyOutput = z.infer<typeof ImproveAnswerFluencyOutputSchema>;
 
@@ -28,9 +28,15 @@ const prompt = ai.definePrompt({
   name: 'improveAnswerFluencyPrompt',
   input: {schema: ImproveAnswerFluencyInputSchema},
   output: {schema: ImproveAnswerFluencyOutputSchema},
-  prompt: `You are an expert text polisher. Your task is to improve the fluency and coherence of the given raw answer.
+  prompt: `You are an expert text editor and polisher. Your task is to take a raw text that contains reasoning steps and a conclusion, and transform it into a single, fluent, and professional answer.
 
-Raw Answer: {{{rawAnswer}}}
+- Extract the final conclusion from the raw text.
+- Rephrase and refine the conclusion to be clear, concise, and easy to understand.
+- Do NOT include the original reasoning steps in your final output.
+- The output should only be the final, polished answer.
+
+Raw Answer:
+{{{rawAnswer}}}
 
 Polished Answer:`, 
 });
