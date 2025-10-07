@@ -10,15 +10,9 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import {
-  Github,
-  PanelLeft,
-} from 'lucide-react';
+import { PanelLeft } from 'lucide-react';
 import { CygnisAILogo } from '@/components/icons';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { MainNav } from './components/main-nav';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { navItems, secondaryNavItems } from './components/nav-items';
 
@@ -37,25 +31,16 @@ export default function MainLayout({
             <CygnisAILogo className="size-8 text-primary" />
             <div className="flex flex-col">
               <h2 className="font-headline text-lg font-semibold tracking-tight">
-                Cygnis A1
+                CygnisAI
               </h2>
-              <p className="text-xs text-sidebar-foreground/70">Assistant</p>
+              <p className="text-xs text-sidebar-foreground/70">Cygnis A1</p>
             </div>
           </div>
         </SidebarHeader>
         <SidebarContent className="p-2">
           <MainNav />
         </SidebarContent>
-        <SidebarFooter className="p-4">
-          <Button variant="ghost" asChild className="justify-start gap-2">
-            <Link href="https://github.com/firebase/studio" target='_blank'>
-              <Github />
-              <span className="group-data-[collapsible=icon]:hidden">
-                GitHub
-              </span>
-            </Link>
-          </Button>
-        </SidebarFooter>
+        <SidebarFooter className="p-4"></SidebarFooter>
       </Sidebar>
       <SidebarInset>
         <header className="flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
@@ -66,12 +51,15 @@ export default function MainLayout({
           </div>
           <div className="flex-1">
             <h1 className="font-headline text-xl font-semibold">
-              {[...navItems, ...secondaryNavItems].find((item) => item.href === pathname)?.label ||
-                'Cygnis A1'}
+              {[...navItems, ...secondaryNavItems].find(
+                (item) => item.href === pathname
+              )?.label || 'Cygnis A1'}
             </h1>
           </div>
         </header>
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex h-[calc(100vh-3.5rem)] flex-col bg-muted/20">
+          {children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );
