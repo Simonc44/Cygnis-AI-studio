@@ -98,15 +98,14 @@ const simpleCalculator = ai.defineTool(
 const answerQuestionPrompt = ai.definePrompt({
   name: 'answerQuestionPrompt',
   tools: [retrieveWikipediaExcerpts, simpleCalculator],
-  prompt: `You are Cygnis A1, an expert assistant. Your goal is to provide a comprehensive and well-structured answer to the user's question.
+  input: {schema: ContextualWikipediaAnswerInputSchema},
+  output: {schema: ContextualWikipediaAnswerOutputSchema, optional: true},
+  system: `You are Cygnis A1, an expert assistant. Your goal is to provide a comprehensive and well-structured answer to the user's question.
 
 - Use your tools to gather information. Use 'retrieveWikipediaExcerpts' for knowledge-based questions and 'simpleCalculator' for math questions.
 - Synthesize the information into a single, coherent, fluent, and professional final answer.
-- If you used Wikipedia, embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the 'retrieveWikipediaExcerpts' tool.
-
-Question: {{{question}}}
-
-Answer:`,
+- If you used Wikipedia, embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the 'retrieveWikipediaExcerpts' tool.`,
+  prompt: `Question: {{{question}}}`,
 });
 
 const contextualWikipediaAnswerFlow = ai.defineFlow(
@@ -116,28 +115,27 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
     outputSchema: ContextualWikipediaAnswerOutputSchema,
   },
   async (input) => {
-    const response = await answerQuestionPrompt.generate({input});
-    const answerText = response.text;
-
-    if (!answerText) {
+    const {output} = await answerQuestionPrompt(input);
+    
+    if (!output?.answer) {
       return {
         answer: 'An unexpected error occurred while generating the answer. The model did not return a valid response. Please try again.',
         sources: [],
       };
     }
-    
+
     // Extract sources from the answer text, which will have formats like [Source Title]
     const sourceRegex = /\[([^\]]+)\]/g;
     let match;
     const sources: string[] = [];
-    while ((match = sourceRegex.exec(answerText)) !== null) {
+    while ((match = sourceRegex.exec(output.answer)) !== null) {
       if (!sources.includes(match[1])) {
         sources.push(match[1]);
       }
     }
 
     // Remove the source annotations from the final answer text
-    const answerWithoutSources = answerText.replace(sourceRegex, '').trim();
+    const answerWithoutSources = output.answer.replace(sourceRegex, '').trim();
 
     return {
       answer: answerWithoutSources,
