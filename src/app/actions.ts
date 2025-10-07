@@ -5,7 +5,6 @@ import {
   contextualWikipediaAnswer,
   type ContextualWikipediaAnswerOutput,
 } from '@/ai/flows/contextual-wikipedia-answer';
-import { improveAnswerFluency } from '@/ai/flows/improve-answer-fluency';
 import { revalidatePath } from 'next/cache';
 
 const askSchema = z.object({
@@ -39,20 +38,16 @@ export async function askAIAction(
   const question = validatedFields.data.question;
 
   try {
-    const contextualAnswer = await contextualWikipediaAnswer({ question });
+    const result = await contextualWikipediaAnswer({ question });
 
-    if (!contextualAnswer.answer) {
+    if (!result.answer) {
       throw new Error('Failed to get a contextual answer.');
     }
-    
-    const polishedResult = await improveAnswerFluency({
-      rawAnswer: contextualAnswer.answer,
-    });
 
     return {
       question,
-      answer: polishedResult.polishedAnswer,
-      sources: contextualAnswer.sources,
+      answer: result.answer,
+      sources: result.sources,
       error: null,
     };
   } catch (error) {

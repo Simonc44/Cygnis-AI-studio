@@ -103,16 +103,14 @@ Follow these steps:
 1.  **Analyze the Question**: Understand the user's intent.
 2.  **Plan**: Decide which tools to use. If it's a knowledge-based question, use 'retrieveWikipediaExcerpts'. If it's a math question, use 'simpleCalculator'.
 3.  **Execute**: Call the chosen tool(s) to gather information.
-4.  **Synthesize**: Combine the information from the tools into a coherent, step-by-step reasoning process. Clearly explain how you arrived at your conclusion.
-5.  **Final Answer**: Formulate the final answer based on your reasoning.
-6.  **Cite Sources**: If you used Wikipedia, embed the source titles in brackets like [Source Title] at the end of the relevant sentence.
+4.  **Synthesize & Polish**: Combine the information from the tools into a single, coherent, fluent, and professional final answer.
+5.  **Cite Sources**: If you used Wikipedia, embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the 'retrieveWikipediaExcerpts' tool.
+
+The final output should be ONLY the polished answer and the embedded sources. Do NOT show your reasoning steps.
 
 Question: {{{question}}}
 
-Show your work clearly by starting with "Reasoning Steps:" and then provide the final answer under "Conclusion:".
-
-Reasoning Steps:
-1.`,
+Polished Answer:`,
 });
 
 const contextualWikipediaAnswerFlow = ai.defineFlow(
@@ -123,19 +121,20 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
   },
   async (input) => {
     const response = await answerQuestionPrompt(input);
-    const rawAnswer = response.output?.answer ?? 'An error occurred while generating the answer.';
+    const finalAnswer = response.output?.answer ?? 'An error occurred while generating the answer.';
     
-    // Simple regex to find text within brackets like [Source Title]
     const sourceRegex = /\[([^\]]+)\]/g;
     let match;
     const sources: string[] = [];
-    while ((match = sourceRegex.exec(rawAnswer)) !== null) {
+    while ((match = sourceRegex.exec(finalAnswer)) !== null) {
       sources.push(match[1]);
     }
 
+    const answerWithoutSources = finalAnswer.replace(sourceRegex, '').trim();
+
     return {
-      answer: rawAnswer, // Pass the raw answer to the next step
-      sources: sources.length > 0 ? Array.from(new Set(sources)) : [],
+      answer: answerWithoutSources,
+      sources: Array.from(new Set(sources)),
     };
   }
 );
