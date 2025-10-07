@@ -8,15 +8,17 @@ import {
 import CodeBlock from './components/code-block';
 import { Badge } from '@/components/ui/badge';
 
+const API_KEY = "cgn_live_stable_demo_api_key_012345";
+
 const curlExample = `curl -X POST https://your-app-url/api/ask \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Authorization: Bearer ${API_KEY}" \\
   -H "Content-Type: application/json" \\
   -d '{"question": "Who discovered penicillin?"}'`;
 
 const jsExample = `fetch('https://your-app-url/api/ask', {
   method: 'POST',
   headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
+    'Authorization': 'Bearer ${API_KEY}',
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
@@ -30,7 +32,7 @@ const jsExample = `fetch('https://your-app-url/api/ask', {
 const pythonExample = `import requests
 
 api_url = "https://your-app-url/api/ask"
-api_key = "YOUR_API_KEY"
+api_key = "${API_KEY}"
 headers = {
     "Authorization": f"Bearer {api_key}",
     "Content-Type": "application/json"
@@ -97,7 +99,7 @@ export default function DocumentationPage() {
             scheme.
           </p>
           <pre className="mt-2 rounded-md bg-secondary p-4 text-sm">
-            <code>Authorization: Bearer YOUR_API_KEY</code>
+            <code>Authorization: Bearer ${API_KEY}</code>
           </pre>
         </CardContent>
       </Card>

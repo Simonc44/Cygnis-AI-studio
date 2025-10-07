@@ -71,10 +71,8 @@ export async function askAIAction(
 let mockApiKeys: { id: string; key: string; createdAt: Date }[] = [
   {
     id: '1',
-    key: `cgn_live_${[...Array(32)]
-      .map(() => Math.random().toString(36)[2])
-      .join('')}`,
-    createdAt: new Date(),
+    key: `cgn_live_stable_demo_api_key_012345`,
+    createdAt: new Date('2024-01-01'),
   },
 ];
 
@@ -87,11 +85,14 @@ export async function getApiKeys() {
 
 export async function generateApiKeyAction() {
   try {
+    // Check if a key with the stable value already exists to avoid duplicates
+    if (mockApiKeys.some(key => key.key === `cgn_live_stable_demo_api_key_012345`)) {
+       const existingKey = mockApiKeys.find(key => key.key === `cgn_live_stable_demo_api_key_012345`);
+        return { success: true, newKey: existingKey };
+    }
     const newKey = {
       id: (mockApiKeys.length + 1).toString(),
-      key: `cgn_live_${[...Array(32)]
-        .map(() => Math.random().toString(36)[2])
-        .join('')}`,
+      key: `cgn_live_stable_demo_api_key_012345`,
       createdAt: new Date(),
     };
     mockApiKeys.push(newKey);
