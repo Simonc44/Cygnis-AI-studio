@@ -44,7 +44,7 @@ export async function askAIAction(
     if (!contextualAnswer.answer) {
       throw new Error('Failed to get a contextual answer.');
     }
-
+    
     const polishedResult = await improveAnswerFluency({
       rawAnswer: contextualAnswer.answer,
     });
@@ -85,19 +85,17 @@ export async function getApiKeys() {
 
 export async function generateApiKeyAction() {
   try {
-    // Check if a key with the stable value already exists to avoid duplicates
-    if (mockApiKeys.some(key => key.key === `cgn_live_stable_demo_api_key_012345`)) {
-       const existingKey = mockApiKeys.find(key => key.key === `cgn_live_stable_demo_api_key_012345`);
-        return { success: true, newKey: existingKey };
-    }
     const newKey = {
       id: (mockApiKeys.length + 1).toString(),
       key: `cgn_live_stable_demo_api_key_012345`,
       createdAt: new Date(),
     };
-    mockApiKeys.push(newKey);
+    // Avoid adding duplicate keys
+    if (!mockApiKeys.some(key => key.key === newKey.key)) {
+        mockApiKeys.push(newKey);
+    }
     revalidatePath('/api-keys');
-    return { success: true, newKey };
+    return { success: true, newKey: mockApiKeys.find(k => k.key === newKey.key) };
   } catch (error) {
     return { success: false, error: 'Failed to generate API key.' };
   }

@@ -122,24 +122,31 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
     outputSchema: ContextualWikipediaAnswerOutputSchema,
   },
   async (input) => {
-    const {output} = await answerQuestionPrompt(input);
-    
-    const answer = output?.answer ?? 'An error occurred while generating the answer.';
+    const response = await answerQuestionPrompt(input);
+    const rawAnswer = response.output?.answer ?? 'An error occurred while generating the answer.';
     
     // Simple regex to find text within brackets like [Source Title]
     const sourceRegex = /\[([^\]]+)\]/g;
     let match;
     const sources: string[] = [];
-    while ((match = sourceRegex.exec(answer)) !== null) {
+    while ((match = sourceRegex.exec(rawAnswer)) !== null) {
       sources.push(match[1]);
     }
 
+    // Extract just the conclusion part for polishing
+    const conclusionIdentifier = "Conclusion:";
+    const conclusionIndex = rawAnswer.lastIndexOf(conclusionIdentifier);
+    let answerToPolish = rawAnswer;
+    if (conclusionIndex !== -1) {
+        answerToPolish = rawAnswer.substring(conclusionIndex + conclusionIdentifier.length);
+    }
+
     // Clean the answer from bracketed sources for a cleaner final output
-    const cleanedAnswer = answer.replace(sourceRegex, '').trim();
+    const cleanedAnswer = answerToPolish.replace(sourceRegex, '').trim();
 
     return {
       answer: cleanedAnswer,
-      sources: sources.length > 0 ? Array.from(new Set(sources)) : (output?.sources || []),
+      sources: sources.length > 0 ? Array.from(new Set(sources)) : (response.output?.sources || []),
     };
   }
 );
