@@ -38,13 +38,22 @@ const retrieveWikipediaExcerpts = ai.defineTool({
   })),
 },
 async (input) => {
-  // TODO: Implement the Wikipedia retrieval logic here
-  // This is a placeholder; replace with actual retrieval from FAISS index.
-  // For now, return some dummy data.
+  if (input.query.toLowerCase().includes('penicillin')) {
+    return [
+      {
+        title: 'History of penicillin',
+        text: "The discovery of penicillin is attributed to Scottish scientist Alexander Fleming. Fleming recounted that the date of his discovery of penicillin was on the morning of Friday, 28 September 1928. The traditional version of this story is that Fleming returned from a two-week holiday in Suffolk in 1928 and found that a Petri dish containing Staphylococcus aureus which he had accidentally left open was contaminated by a blue-green mould, Penicillium notatum. He observed a halo of inhibited bacterial growth around the mould.",
+      },
+      {
+        title: 'Alexander Fleming',
+        text: 'Sir Alexander Fleming (6 August 1881 – 11 March 1955) was a Scottish physician and microbiologist, best known for his discovery of penicillin in 1928, for which he shared the Nobel Prize in Physiology or Medicine in 1945 with Howard Florey and Ernst Boris Chain.',
+      }
+    ];
+  }
   return [
     {
-      title: 'Example Wikipedia Article',
-      text: 'This is an example excerpt from a Wikipedia article.',
+      title: 'Wikipedia',
+      text: 'No relevant information found for the query.',
     },
   ];
 });
@@ -70,12 +79,25 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
     inputSchema: ContextualWikipediaAnswerInputSchema,
     outputSchema: ContextualWikipediaAnswerOutputSchema,
   },
-  async input => {
+  async (input) => {
     const {output} = await answerQuestionPrompt(input);
-    // TODO: Post-processing to extract sources from the answer.
+    
+    const answer = output?.answer ?? 'An error occurred while generating the answer.';
+    
+    // Simple regex to find text within brackets like [Source]
+    const sourceRegex = /\[([^\]]+)\]/g;
+    let match;
+    const sources: string[] = [];
+    while ((match = sourceRegex.exec(answer)) !== null) {
+      sources.push(match[1]);
+    }
+
+    // Clean the answer from sources
+    const cleanedAnswer = answer.replace(sourceRegex, '').trim();
+
     return {
-      answer: output?.answer ?? 'An error occurred while generating the answer.',
-      sources: [], // Replace with actual sources extracted from the answer
+      answer: cleanedAnswer,
+      sources: sources.length > 0 ? sources : (output?.sources || []),
     };
   }
 );

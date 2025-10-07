@@ -79,6 +79,9 @@ let mockApiKeys: { id: string; key: string; createdAt: Date }[] = [
 ];
 
 export async function getApiKeys() {
+  // In a real app, you'd fetch this from a database.
+  // We'll simulate a delay to mimic a network request.
+  await new Promise(resolve => setTimeout(resolve, 100));
   return mockApiKeys;
 }
 
