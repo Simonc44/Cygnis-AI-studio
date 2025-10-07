@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Sparkles, Bot, User, FileText, Loader2 } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
 const initialState: AskFormState = {
   question: '',
@@ -31,6 +32,17 @@ function SubmitButton() {
 
 export default function PlaygroundPage() {
   const [state, formAction] = useFormState(askAIAction, initialState);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!formRef.current) return;
+    
+    const defaultQuestion = "Who discovered penicillin?";
+    const questionTextarea = formRef.current.elements.namedItem("question") as HTMLTextAreaElement | null;
+    if (questionTextarea) {
+      questionTextarea.value = defaultQuestion;
+    }
+  }, []);
 
   return (
     <div className="flex h-full flex-col gap-8">
@@ -41,7 +53,7 @@ export default function PlaygroundPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={formAction} className="flex flex-col gap-4">
+          <form ref={formRef} action={formAction} className="flex flex-col gap-4">
             <Textarea
               name="question"
               placeholder="e.g., Who discovered penicillin?"
