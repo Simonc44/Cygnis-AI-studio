@@ -62,8 +62,11 @@ export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswer
     }
   }
 
+  // Clean the polished answer from sources
+  const cleanedAnswer = polishedAnswerResponse.polishedAnswer.replace(sourceRegex, '').trim();
+
   return {
-    answer: polishedAnswerResponse.polishedAnswer,
+    answer: cleanedAnswer,
     sources: Array.from(new Set(sources)), // Deduplicate sources
   };
 }
