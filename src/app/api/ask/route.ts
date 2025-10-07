@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import {
   contextualWikipediaAnswer,
-  type ContextualWikipediaAnswerOutput,
 } from '@/ai/flows/contextual-wikipedia-answer';
-import { improveAnswerFluency } from '@/ai/flows/improve-answer-fluency';
 import { getApiKeys } from '@/app/actions';
 
 export async function POST(request: Request) {
@@ -38,16 +36,9 @@ export async function POST(request: Request) {
 
   try {
     const contextualAnswer = await contextualWikipediaAnswer({ question });
-    if (!contextualAnswer.answer) {
-      throw new Error('Failed to get a contextual answer.');
-    }
-
-    const polishedResult = await improveAnswerFluency({
-      rawAnswer: contextualAnswer.answer,
-    });
 
     return NextResponse.json({
-      answer: polishedResult.polishedAnswer,
+      answer: contextualAnswer.answer,
       sources: contextualAnswer.sources,
     });
   } catch (error) {
