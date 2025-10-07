@@ -8,7 +8,7 @@
  * - ContextualWikipediaAnswerOutput - The return type for the contextualWikipediaAnswer function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, geminiPro} from '@/ai/genkit';
 import {z} from 'genkit';
 import {improveAnswerFluency} from './improve-answer-fluency';
 
@@ -135,6 +135,7 @@ const simpleCalculator = ai.defineTool(
 
 const contextualWikipediaAnswerPrompt = ai.definePrompt({
   name: 'contextualWikipediaAnswerPrompt',
+  model: geminiPro,
   tools: [retrieveWikipediaExcerpts, simpleCalculator],
   system: `You are Cygnis A1, an expert assistant. Your goal is to provide a comprehensive answer to the user's question by following these steps:
 1.  Use your tools to gather information. Use 'retrieveWikipediaExcerpts' for knowledge-based questions and 'simpleCalculator' for math questions.
