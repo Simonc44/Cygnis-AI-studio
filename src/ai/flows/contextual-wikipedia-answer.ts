@@ -23,7 +23,8 @@ const ContextualWikipediaAnswerOutputSchema = z.object({
 export type ContextualWikipediaAnswerOutput = z.infer<typeof ContextualWikipediaAnswerOutputSchema>;
 
 export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswerInput): Promise<ContextualWikipediaAnswerOutput> {
-  if (input.question.toLowerCase().trim().includes('who are you')) {
+  const trimmedQuestion = input.question.toLowerCase().trim();
+  if (trimmedQuestion.includes('who are you')) {
     return {
       answer: 'I am Cygnis A1, an expert assistant AI. I can answer questions using contextual knowledge from various sources.',
       sources: ['Internal knowledge'],
@@ -64,17 +65,43 @@ async (input) => {
   ];
 });
 
+const simpleCalculator = ai.defineTool(
+  {
+    name: 'simpleCalculator',
+    description: 'A simple calculator that can perform basic arithmetic operations.',
+    inputSchema: z.object({
+      expression: z.string().describe('The mathematical expression to evaluate, e.g., "1+1".'),
+    }),
+    outputSchema: z.string(),
+  },
+  async (input) => {
+    try {
+      // WARNING: Using eval is generally unsafe. In a real-world scenario,
+      // you should use a dedicated math expression parser.
+      // For this demo, we'll restrict it to very simple expressions.
+      const sanitizedExpression = input.expression.replace(/[^-()\d/*+.]/g, '');
+      if (sanitizedExpression !== input.expression) {
+        return "I can only handle simple arithmetic.";
+      }
+      const result = eval(sanitizedExpression);
+      return `${input.expression} = ${result}`;
+    } catch (e) {
+      return "Sorry, I couldn't calculate that.";
+    }
+  }
+);
+
 
 const answerQuestionPrompt = ai.definePrompt({
   name: 'answerQuestionPrompt',
   input: {schema: ContextualWikipediaAnswerInputSchema},
   output: {schema: ContextualWikipediaAnswerOutputSchema},
-  tools: [retrieveWikipediaExcerpts],
-  prompt: `You are Cygnis A1, an expert assistant. Use only the provided Wikipedia excerpts to answer the question and cite the sources between brackets.
+  tools: [retrieveWikipediaExcerpts, simpleCalculator],
+  prompt: `You are Cygnis A1, an expert assistant. Use the provided tools to answer the question. If you use Wikipedia excerpts, cite the sources between brackets. If you use the calculator, provide the result.
 
 Question: {{{question}}}
 
-Instructions: Show your reasoning step by step and then provide the conclusion. Use only the provided excerpts.
+Instructions: Show your reasoning step by step and then provide the conclusion.
 
 Answer:\nSteps:\n1.`,
 });
