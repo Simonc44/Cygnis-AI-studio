@@ -149,15 +149,11 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
   {
     name: 'contextualWikipediaAnswerFlow',
     inputSchema: ContextualWikipediaAnswerInputSchema,
-    outputSchema: z.object({ rawAnswer: z.string() }),
+    outputSchema: z.object({ rawAnswer: z.string().optional() }),
   },
   async (input) => {
     const response = await contextualWikipediaAnswerPrompt.generate(input);
     const rawAnswer = response.text;
-    
-    if (!rawAnswer) {
-      return { rawAnswer: 'The model did not return a valid response.' };
-    }
 
     return { rawAnswer };
   }
