@@ -24,7 +24,7 @@ export type ContextualWikipediaAnswerOutput = z.infer<typeof ContextualWikipedia
 
 export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswerInput): Promise<ContextualWikipediaAnswerOutput> {
   const trimmedQuestion = input.question.toLowerCase().trim();
-  const identityQueries = ['who are you', 'what are you', 'who is your creator'];
+  const identityQueries = ['who are you', 'what are you', 'who is your creator', 'who made you'];
 
   if (identityQueries.some(q => trimmedQuestion.includes(q))) {
     return {
@@ -118,23 +118,33 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
   },
   async (input) => {
     const response = await answerQuestionPrompt(input);
-    const finalAnswer = response.output?.answer ?? 'An error occurred while generating the answer.';
+    const output = response.output;
+
+    if (!output) {
+      return {
+        answer: 'An unexpected error occurred while generating the answer.',
+        sources: [],
+      };
+    }
+
+    const finalAnswer = output.answer;
     
+    // Extract sources from the answer text, which will have formats like [Source Title]
     const sourceRegex = /\[([^\]]+)\]/g;
     let match;
     const sources: string[] = [];
     while ((match = sourceRegex.exec(finalAnswer)) !== null) {
-      // This is to avoid pushing duplicates from a single response
       if (!sources.includes(match[1])) {
         sources.push(match[1]);
       }
     }
 
+    // Remove the source annotations from the final answer text
     const answerWithoutSources = finalAnswer.replace(sourceRegex, '').trim();
 
     return {
       answer: answerWithoutSources,
-      sources: Array.from(new Set(sources)),
+      sources: Array.from(new Set(sources)), // Deduplicate sources
     };
   }
 );
