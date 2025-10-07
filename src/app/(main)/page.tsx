@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
 import { askAIAction, type AskFormState } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,7 +32,7 @@ function SubmitButton() {
 }
 
 export default function PlaygroundPage() {
-  const [state, formAction] = useFormState(askAIAction, initialState);
+  const [state, formAction] = useActionState(askAIAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
