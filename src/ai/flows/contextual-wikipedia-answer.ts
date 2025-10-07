@@ -24,9 +24,11 @@ export type ContextualWikipediaAnswerOutput = z.infer<typeof ContextualWikipedia
 
 export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswerInput): Promise<ContextualWikipediaAnswerOutput> {
   const trimmedQuestion = input.question.toLowerCase().trim();
-  if (trimmedQuestion.includes('who are you')) {
+  const identityQueries = ['who are you', 'what are you', 'who is your creator'];
+
+  if (identityQueries.some(q => trimmedQuestion.includes(q))) {
     return {
-      answer: 'I am Cygnis A1, an expert assistant AI. I can answer questions using contextual knowledge from various sources.',
+      answer: 'I am Cygnis A1, an expert assistant AI built by the CygnisAI team. I can answer questions and perform tasks using contextual knowledge.',
       sources: ['Internal knowledge'],
     };
   }
@@ -97,20 +99,15 @@ const answerQuestionPrompt = ai.definePrompt({
   input: {schema: ContextualWikipediaAnswerInputSchema},
   output: {schema: ContextualWikipediaAnswerOutputSchema},
   tools: [retrieveWikipediaExcerpts, simpleCalculator],
-  prompt: `You are Cygnis A1, a powerful and accurate expert assistant. Your goal is to provide a comprehensive and well-structured answer to the user's question.
+  prompt: `You are Cygnis A1, an expert assistant. Your goal is to provide a comprehensive and well-structured answer to the user's question.
 
-Follow these steps:
-1.  **Analyze the Question**: Understand the user's intent.
-2.  **Plan**: Decide which tools to use. If it's a knowledge-based question, use 'retrieveWikipediaExcerpts'. If it's a math question, use 'simpleCalculator'.
-3.  **Execute**: Call the chosen tool(s) to gather information.
-4.  **Synthesize & Polish**: Combine the information from the tools into a single, coherent, fluent, and professional final answer.
-5.  **Cite Sources**: If you used Wikipedia, embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the 'retrieveWikipediaExcerpts' tool.
-
-The final output should be ONLY the polished answer and the embedded sources. Do NOT show your reasoning steps.
+- Use your tools to gather information. Use 'retrieveWikipediaExcerpts' for knowledge-based questions and 'simpleCalculator' for math questions.
+- Synthesize the information into a single, coherent, fluent, and professional final answer.
+- If you used Wikipedia, embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the 'retrieveWikipediaExcerpts' tool.
 
 Question: {{{question}}}
 
-Polished Answer:`,
+Answer:`,
 });
 
 const contextualWikipediaAnswerFlow = ai.defineFlow(
@@ -127,7 +124,10 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
     let match;
     const sources: string[] = [];
     while ((match = sourceRegex.exec(finalAnswer)) !== null) {
-      sources.push(match[1]);
+      // This is to avoid pushing duplicates from a single response
+      if (!sources.includes(match[1])) {
+        sources.push(match[1]);
+      }
     }
 
     const answerWithoutSources = finalAnswer.replace(sourceRegex, '').trim();
