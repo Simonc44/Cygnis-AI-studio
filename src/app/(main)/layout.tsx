@@ -1,42 +1,26 @@
 'use client';
 
 import * as React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import {
   SidebarProvider,
   Sidebar,
   SidebarHeader,
   SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
 import {
-  Bot,
-  KeyRound,
-  BookText,
-  BarChart3,
   Github,
   PanelLeft,
 } from 'lucide-react';
 import { CygnisAILogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
-
-const navItems = [
-  { href: '/', label: 'Playground', icon: Bot },
-  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
-];
-
-const secondaryNavItems = [
-    { href: '/api-keys', label: 'API Keys', icon: KeyRound },
-    { href: '/documentation', label: 'Documentation', icon: BookText },
-]
+import { MainNav } from './components/main-nav';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { navItems, secondaryNavItems } from './components/nav-items';
 
 export default function MainLayout({
   children,
@@ -60,37 +44,7 @@ export default function MainLayout({
           </div>
         </SidebarHeader>
         <SidebarContent className="p-2">
-          <SidebarMenu>
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <Link href={item.href}>
-                  <SidebarMenuButton
-                    isActive={pathname === item.href}
-                    tooltip={{ children: item.label }}
-                  >
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-          <Separator className="my-2" />
-           <SidebarMenu>
-            {secondaryNavItems.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <Link href={item.href}>
-                  <SidebarMenuButton
-                    isActive={pathname === item.href}
-                    tooltip={{ children: item.label }}
-                  >
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
+          <MainNav />
         </SidebarContent>
         <SidebarFooter className="p-4">
           <Button variant="ghost" asChild className="justify-start gap-2">
