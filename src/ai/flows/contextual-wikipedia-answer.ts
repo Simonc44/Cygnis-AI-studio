@@ -136,7 +136,6 @@ const simpleCalculator = ai.defineTool(
 const contextualWikipediaAnswerPrompt = ai.definePrompt({
   name: 'contextualWikipediaAnswerPrompt',
   tools: [retrieveWikipediaExcerpts, simpleCalculator],
-  input: { schema: ContextualWikipediaAnswerInputSchema },
   system: `You are Cygnis A1, an expert assistant. Your goal is to provide a comprehensive answer to the user's question by following these steps:
 1.  Use your tools to gather information. Use 'retrieveWikipediaExcerpts' for knowledge-based questions and 'simpleCalculator' for math questions.
 2.  First, think about the steps you will take to answer the question.
@@ -152,8 +151,12 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
     outputSchema: z.object({ rawAnswer: z.string().optional() }),
   },
   async (input) => {
-    const response = await contextualWikipediaAnswerPrompt.generate(input);
+    const response = await contextualWikipediaAnswerPrompt(input);
     const rawAnswer = response.text;
+
+    if (!rawAnswer) {
+      return { rawAnswer: undefined };
+    }
 
     return { rawAnswer };
   }
