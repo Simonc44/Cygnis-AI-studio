@@ -126,21 +126,19 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
         sources: [],
       };
     }
-
-    const finalAnswer = output.answer;
     
     // Extract sources from the answer text, which will have formats like [Source Title]
     const sourceRegex = /\[([^\]]+)\]/g;
     let match;
     const sources: string[] = [];
-    while ((match = sourceRegex.exec(finalAnswer)) !== null) {
+    while ((match = sourceRegex.exec(output.answer)) !== null) {
       if (!sources.includes(match[1])) {
         sources.push(match[1]);
       }
     }
 
     // Remove the source annotations from the final answer text
-    const answerWithoutSources = finalAnswer.replace(sourceRegex, '').trim();
+    const answerWithoutSources = output.answer.replace(sourceRegex, '').trim();
 
     return {
       answer: answerWithoutSources,
