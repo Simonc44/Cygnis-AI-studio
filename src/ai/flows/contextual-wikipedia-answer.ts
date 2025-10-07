@@ -26,7 +26,9 @@ export type ContextualWikipediaAnswerOutput = z.infer<typeof ContextualWikipedia
 export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswerInput): Promise<ContextualWikipediaAnswerOutput> {
   // RAG flow
   const rawAnswerResponse = await contextualWikipediaAnswerFlow(input);
-  if (!rawAnswerResponse?.rawAnswer) {
+  const rawAnswer = rawAnswerResponse?.rawAnswer;
+
+  if (!rawAnswer) {
     return {
       answer: 'An unexpected error occurred while generating the answer. The model did not return a valid response. Please try again.',
       sources: [],
@@ -34,7 +36,7 @@ export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswer
   }
 
   // Fluency polish
-  const polishedAnswerResponse = await improveAnswerFluency({ rawAnswer: rawAnswerResponse.rawAnswer });
+  const polishedAnswerResponse = await improveAnswerFluency({ rawAnswer: rawAnswer });
   if (!polishedAnswerResponse?.polishedAnswer) {
       return {
           answer: 'An unexpected error occurred while polishing the answer.',
@@ -46,7 +48,7 @@ export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswer
   const sourceRegex = /\[([^\]]+)\]/g;
   let match;
   const sources: string[] = [];
-  while ((match = sourceRegex.exec(rawAnswerResponse.rawAnswer)) !== null) {
+  while ((match = sourceRegex.exec(rawAnswer)) !== null) {
     if (!sources.includes(match[1])) {
       sources.push(match[1]);
     }
