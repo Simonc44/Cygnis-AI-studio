@@ -24,16 +24,6 @@ const ContextualWikipediaAnswerOutputSchema = z.object({
 export type ContextualWikipediaAnswerOutput = z.infer<typeof ContextualWikipediaAnswerOutputSchema>;
 
 export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswerInput): Promise<ContextualWikipediaAnswerOutput> {
-  const trimmedQuestion = input.question.toLowerCase().trim();
-  const identityQueries = ['who are you', 'what are you', 'who is your creator', 'who made you'];
-
-  if (identityQueries.some(q => trimmedQuestion.includes(q))) {
-    return {
-      answer: 'I am Cygnis A1, an AI assistant designed by CygnisAI and trained by Google.',
-      sources: ['Internal knowledge'],
-    };
-  }
-  
   // RAG flow
   const rawAnswerResponse = await contextualWikipediaAnswerFlow(input);
   if (!rawAnswerResponse?.rawAnswer) {
@@ -83,6 +73,16 @@ const retrieveWikipediaExcerpts = ai.defineTool({
   })),
 },
 async (input) => {
+  const trimmedQuery = input.query.toLowerCase().trim();
+  if (trimmedQuery.includes('who are you') || trimmedQuery.includes('what are you')) {
+    return [
+      {
+        title: 'Internal knowledge',
+        text: 'I am Cygnis A1, an AI assistant designed by CygnisAI and trained by Google.',
+      }
+    ];
+  }
+
   if (input.query.toLowerCase().includes('penicillin')) {
     return [
       {
