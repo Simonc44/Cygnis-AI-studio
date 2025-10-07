@@ -37,7 +37,9 @@ export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswer
 
   // Fluency polish
   const polishedAnswerResponse = await improveAnswerFluency({ rawAnswer: rawAnswer });
-  if (!polishedAnswerResponse?.polishedAnswer) {
+  const polishedAnswer = polishedAnswerResponse?.polishedAnswer;
+
+  if (!polishedAnswer) {
       return {
           answer: 'An unexpected error occurred while polishing the answer.',
           sources: [],
@@ -55,7 +57,7 @@ export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswer
   }
 
   // Clean the polished answer from sources
-  const cleanedAnswer = polishedAnswerResponse.polishedAnswer.replace(sourceRegex, '').trim();
+  const cleanedAnswer = polishedAnswer.replace(sourceRegex, '').trim();
 
   return {
     answer: cleanedAnswer,
