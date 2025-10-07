@@ -26,13 +26,17 @@ import {
 import { CygnisAILogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 
 const navItems = [
   { href: '/', label: 'Playground', icon: Bot },
-  { href: '/api-keys', label: 'API Keys', icon: KeyRound },
-  { href: '/documentation', label: 'Documentation', icon: BookText },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
 ];
+
+const secondaryNavItems = [
+    { href: '/api-keys', label: 'API Keys', icon: KeyRound },
+    { href: '/documentation', label: 'Documentation', icon: BookText },
+]
 
 export default function MainLayout({
   children,
@@ -55,9 +59,25 @@ export default function MainLayout({
             </div>
           </div>
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent className="p-2">
           <SidebarMenu>
             {navItems.map((item) => (
+              <SidebarMenuItem key={item.href}>
+                <Link href={item.href}>
+                  <SidebarMenuButton
+                    isActive={pathname === item.href}
+                    tooltip={{ children: item.label }}
+                  >
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+          <Separator className="my-2" />
+           <SidebarMenu>
+            {secondaryNavItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <Link href={item.href}>
                   <SidebarMenuButton
@@ -74,7 +94,7 @@ export default function MainLayout({
         </SidebarContent>
         <SidebarFooter className="p-4">
           <Button variant="ghost" asChild className="justify-start gap-2">
-            <Link href="#">
+            <Link href="https://github.com/firebase/studio" target='_blank'>
               <Github />
               <span className="group-data-[collapsible=icon]:hidden">
                 GitHub
@@ -84,7 +104,7 @@ export default function MainLayout({
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-background/95 px-4 md:px-6">
+        <header className="flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
           <div className="md:hidden">
             <SidebarTrigger>
               <PanelLeft />
@@ -92,12 +112,12 @@ export default function MainLayout({
           </div>
           <div className="flex-1">
             <h1 className="font-headline text-xl font-semibold">
-              {navItems.find((item) => item.href === pathname)?.label ||
+              {[...navItems, ...secondaryNavItems].find((item) => item.href === pathname)?.label ||
                 'Cygnis A1'}
             </h1>
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-4 md:p-8">{children}</main>
+        <main className="flex-1 overflow-auto">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
