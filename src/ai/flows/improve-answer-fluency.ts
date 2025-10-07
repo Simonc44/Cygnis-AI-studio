@@ -7,7 +7,7 @@
  * - ImproveAnswerFluencyOutput - The return type for the improveAnswerFluency function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, geminiPro} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const ImproveAnswerFluencyInputSchema = z.object({
@@ -30,6 +30,7 @@ export async function improveAnswerFluency(input: ImproveAnswerFluencyInput): Pr
 
 const prompt = ai.definePrompt({
   name: 'improveAnswerFluencyPrompt',
+  model: geminiPro,
   input: {schema: ImproveAnswerFluencyInputSchema},
   output: {schema: ImproveAnswerFluencyOutputSchema, optional: true},
   prompt: `You are an expert text editor and polisher. Your task is to take a raw text that contains reasoning steps and a conclusion, and transform it into a single, fluent, and professional answer.
