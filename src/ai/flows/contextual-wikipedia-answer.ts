@@ -87,8 +87,6 @@ const simpleCalculator = ai.defineTool(
 
 const answerQuestionPrompt = ai.definePrompt({
   name: 'answerQuestionPrompt',
-  input: {schema: ContextualWikipediaAnswerInputSchema},
-  output: {schema: ContextualWikipediaAnswerOutputSchema},
   tools: [retrieveWikipediaExcerpts, simpleCalculator],
   prompt: `You are Cygnis A1, an expert assistant. Your goal is to provide a comprehensive and well-structured answer to the user's question.
 
@@ -118,12 +116,12 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
       };
     }
     
-    const response = await answerQuestionPrompt(input);
-    const output = response.output;
+    const response = await answerQuestionPrompt.generate({input});
+    const answerText = response.text;
 
-    if (!output || !output.answer) {
+    if (!answerText) {
       return {
-        answer: 'An unexpected error occurred while generating the answer. Please try again.',
+        answer: 'An unexpected error occurred while generating the answer. The model did not return a valid response. Please try again.',
         sources: [],
       };
     }
@@ -132,14 +130,14 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
     const sourceRegex = /\[([^\]]+)\]/g;
     let match;
     const sources: string[] = [];
-    while ((match = sourceRegex.exec(output.answer)) !== null) {
+    while ((match = sourceRegex.exec(answerText)) !== null) {
       if (!sources.includes(match[1])) {
         sources.push(match[1]);
       }
     }
 
     // Remove the source annotations from the final answer text
-    const answerWithoutSources = output.answer.replace(sourceRegex, '').trim();
+    const answerWithoutSources = answerText.replace(sourceRegex, '').trim();
 
     return {
       answer: answerWithoutSources,
