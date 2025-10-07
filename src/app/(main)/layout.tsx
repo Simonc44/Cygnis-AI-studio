@@ -23,6 +23,15 @@ export default function MainLayout({
 }) {
   const pathname = usePathname();
 
+  const getPageTitle = () => {
+    const allNavItems = [...navItems, ...secondaryNavItems];
+    const currentItem = allNavItems.find(
+      (item) => pathname.startsWith(item.href) && item.href !== '/'
+    );
+    if (pathname === '/') return 'Playground';
+    return currentItem?.label || 'Cygnis A1';
+  }
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -51,9 +60,7 @@ export default function MainLayout({
           </div>
           <div className="flex-1">
             <h1 className="font-headline text-xl font-semibold">
-              {[...navItems, ...secondaryNavItems].find(
-                (item) => item.href === pathname
-              )?.label || 'Cygnis A1'}
+              {getPageTitle()}
             </h1>
           </div>
         </header>

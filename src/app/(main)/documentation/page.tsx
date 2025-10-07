@@ -51,14 +51,14 @@ else:
 const responseExample = `{
   "answer": "The discovery of penicillin is attributed to Scottish scientist Alexander Fleming in 1928.",
   "sources": [
-    "Wikipedia: Alexander Fleming",
-    "Wikipedia: History of penicillin"
+    "History of penicillin",
+    "Alexander Fleming"
   ]
 }`;
 
 export default function DocumentationPage() {
   return (
-    <div className="space-y-8">
+    <div className="p-4 md:p-6 space-y-8 overflow-auto h-full">
       <Card>
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Introduction</CardTitle>
@@ -87,12 +87,8 @@ export default function DocumentationPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p>
-            All API requests must be authenticated with an API key. You can
-            generate and manage your keys in the{' '}
-            <a href="/api-keys" className="text-primary underline">
-              API Keys
-            </a>{' '}
-            dashboard.
+            All API requests must be authenticated with an API key. For this demo,
+            please use the static key provided below.
           </p>
           <p>
             Include your API key in the `Authorization` header with the `Bearer`
