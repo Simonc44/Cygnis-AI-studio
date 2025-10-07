@@ -201,7 +201,7 @@ export default function PlaygroundPage() {
                 <Textarea
                   ref={textareaRef}
                   name="question"
-                  placeholder="e.g., What is 1+1?"
+                  placeholder="Ask cygnis"
                   className="max-h-48 flex-1 resize-none border-none bg-transparent shadow-none focus-visible:ring-0"
                   required
                   onInput={handleInput}
