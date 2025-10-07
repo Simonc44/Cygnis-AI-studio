@@ -28,7 +28,7 @@ export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswer
 
   if (identityQueries.some(q => trimmedQuestion.includes(q))) {
     return {
-      answer: 'I am Cygnis A1, an expert assistant AI built by the CygnisAI team. I can answer questions and perform tasks using contextual knowledge.',
+      answer: 'I am Cygnis A1, an expert assistant AI. My creator is CygnisAI.',
       sources: ['Internal knowledge'],
     };
   }
