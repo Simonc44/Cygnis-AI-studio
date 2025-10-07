@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import {
   contextualWikipediaAnswer,
 } from '@/ai/flows/contextual-wikipedia-answer';
-import { getApiKeys } from '@/app/actions';
+
+const API_KEY = 'cgn_live_stable_demo_api_key_012345';
 
 export async function POST(request: Request) {
   const authHeader = request.headers.get('Authorization');
@@ -17,10 +18,8 @@ export async function POST(request: Request) {
   }
 
   const apiKey = authHeader.split(' ')[1];
-  const validKeys = await getApiKeys();
-  const isKeyValid = validKeys.some((k) => k.key === apiKey);
 
-  if (!isKeyValid) {
+  if (apiKey !== API_KEY) {
     return NextResponse.json(
       { error: 'Forbidden: Invalid API key' },
       { status: 403 }

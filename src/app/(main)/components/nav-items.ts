@@ -1,4 +1,4 @@
-import { Bot, KeyRound, BookText, BarChart3 } from 'lucide-react';
+import { Bot, BookText, BarChart3 } from 'lucide-react';
 
 export const navItems = [
   { href: '/', label: 'Playground', icon: Bot },
@@ -6,6 +6,5 @@ export const navItems = [
 ];
 
 export const secondaryNavItems = [
-  { href: '/api-keys', label: 'API Keys', icon: KeyRound },
   { href: '/documentation', label: 'Documentation', icon: BookText },
 ];
