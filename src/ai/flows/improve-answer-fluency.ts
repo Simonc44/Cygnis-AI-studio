@@ -21,13 +21,17 @@ const ImproveAnswerFluencyOutputSchema = z.object({
 export type ImproveAnswerFluencyOutput = z.infer<typeof ImproveAnswerFluencyOutputSchema>;
 
 export async function improveAnswerFluency(input: ImproveAnswerFluencyInput): Promise<ImproveAnswerFluencyOutput> {
-  return improveAnswerFluencyFlow(input);
+  const result = await improveAnswerFluencyFlow(input);
+  if (!result?.polishedAnswer) {
+      return { polishedAnswer: "The AI failed to produce a polished answer." };
+  }
+  return result;
 }
 
 const prompt = ai.definePrompt({
   name: 'improveAnswerFluencyPrompt',
   input: {schema: ImproveAnswerFluencyInputSchema},
-  output: {schema: ImproveAnswerFluencyOutputSchema},
+  output: {schema: ImproveAnswerFluencyOutputSchema, optional: true},
   prompt: `You are an expert text editor and polisher. Your task is to take a raw text that contains reasoning steps and a conclusion, and transform it into a single, fluent, and professional answer.
 
 - Extract the final conclusion from the raw text.
@@ -49,6 +53,11 @@ const improveAnswerFluencyFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    
+    if (!output?.polishedAnswer) {
+        // Fallback in case of empty output
+        return { polishedAnswer: input.rawAnswer };
+    }
+    return output;
   }
 );

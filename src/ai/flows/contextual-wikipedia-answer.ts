@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {improveAnswerFluency} from './improve-answer-fluency';
 
 const ContextualWikipediaAnswerInputSchema = z.object({
   question: z.string().describe('The question to answer using Wikipedia excerpts.'),
@@ -32,8 +33,39 @@ export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswer
       sources: ['Internal knowledge'],
     };
   }
+  
+  // RAG flow
+  const rawAnswerResponse = await contextualWikipediaAnswerFlow(input);
+  if (!rawAnswerResponse?.rawAnswer) {
+    return {
+      answer: 'An unexpected error occurred while generating the answer. The model did not return a valid response. Please try again.',
+      sources: [],
+    };
+  }
 
-  return contextualWikipediaAnswerFlow(input);
+  // Fluency polish
+  const polishedAnswerResponse = await improveAnswerFluency({ rawAnswer: rawAnswerResponse.rawAnswer });
+  if (!polishedAnswerResponse?.polishedAnswer) {
+      return {
+          answer: 'An unexpected error occurred while polishing the answer.',
+          sources: [],
+      };
+  }
+
+  // Extract sources from the raw answer text
+  const sourceRegex = /\[([^\]]+)\]/g;
+  let match;
+  const sources: string[] = [];
+  while ((match = sourceRegex.exec(rawAnswerResponse.rawAnswer)) !== null) {
+    if (!sources.includes(match[1])) {
+      sources.push(match[1]);
+    }
+  }
+
+  return {
+    answer: polishedAnswerResponse.polishedAnswer,
+    sources: Array.from(new Set(sources)), // Deduplicate sources
+  };
 }
 
 const retrieveWikipediaExcerpts = ai.defineTool({
@@ -56,7 +88,7 @@ async (input) => {
       },
       {
         title: 'Alexander Fleming',
-        text: 'Sir Alexander Fleming (6 August 1881 – 11 March 1955) was a Scottish physician and microbiologist, best known for his discovery of penicillin in 1928, for which he shared the Nobel Prize in Physiology or Medicine in 1945 with Howard Florey and Ernst Boris Chain.',
+        text: 'Sir Alexander Fleming (6 August 1881 – 11 March 1955) was a Scottish physician and microbiologist, best known for his discovery of penicillin in 1928, for which he shared the Nobel Prize in Physiology or Medicine in 145 with Howard Florey and Ernst Boris Chain.',
       }
     ];
   }
@@ -95,51 +127,32 @@ const simpleCalculator = ai.defineTool(
 );
 
 
-const answerQuestionPrompt = ai.definePrompt({
-  name: 'answerQuestionPrompt',
-  tools: [retrieveWikipediaExcerpts, simpleCalculator],
-  input: {schema: ContextualWikipediaAnswerInputSchema},
-  output: {schema: ContextualWikipediaAnswerOutputSchema, optional: true},
-  system: `You are Cygnis A1, an expert assistant. Your goal is to provide a comprehensive and well-structured answer to the user's question.
-
-- Use your tools to gather information. Use 'retrieveWikipediaExcerpts' for knowledge-based questions and 'simpleCalculator' for math questions.
-- Synthesize the information into a single, coherent, fluent, and professional final answer.
-- If you used Wikipedia, embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the 'retrieveWikipediaExcerpts' tool.`,
-  prompt: `Question: {{{question}}}`,
-});
+const contextualWikipediaAnswerPrompt = ai.definePrompt({
+    name: 'contextualWikipediaAnswerPrompt',
+    tools: [retrieveWikipediaExcerpts, simpleCalculator],
+    input: { schema: ContextualWikipediaAnswerInputSchema },
+    system: `You are Cygnis A1, an expert assistant. Your goal is to provide a comprehensive answer to the user's question by following these steps:
+  1.  Use your tools to gather information. Use 'retrieveWikipediaExcerpts' for knowledge-based questions and 'simpleCalculator' for math questions.
+  2.  First, think about the steps you will take to answer the question.
+  3.  Then, write out the final answer based on the information you gathered.
+  4.  Crucially, you MUST embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the 'retrieveWikipediaExcerpts' tool.`,
+    prompt: `Question: {{{question}}}`,
+  });
 
 const contextualWikipediaAnswerFlow = ai.defineFlow(
   {
     name: 'contextualWikipediaAnswerFlow',
     inputSchema: ContextualWikipediaAnswerInputSchema,
-    outputSchema: ContextualWikipediaAnswerOutputSchema,
+    outputSchema: z.object({ rawAnswer: z.string() }),
   },
   async (input) => {
-    const {output} = await answerQuestionPrompt(input);
+    const response = await contextualWikipediaAnswerPrompt.generate(input);
+    const rawAnswer = response.text;
     
-    if (!output?.answer) {
-      return {
-        answer: 'An unexpected error occurred while generating the answer. The model did not return a valid response. Please try again.',
-        sources: [],
-      };
+    if (!rawAnswer) {
+      return { rawAnswer: 'The model did not return a valid response.' };
     }
 
-    // Extract sources from the answer text, which will have formats like [Source Title]
-    const sourceRegex = /\[([^\]]+)\]/g;
-    let match;
-    const sources: string[] = [];
-    while ((match = sourceRegex.exec(output.answer)) !== null) {
-      if (!sources.includes(match[1])) {
-        sources.push(match[1]);
-      }
-    }
-
-    // Remove the source annotations from the final answer text
-    const answerWithoutSources = output.answer.replace(sourceRegex, '').trim();
-
-    return {
-      answer: answerWithoutSources,
-      sources: Array.from(new Set(sources)), // Deduplicate sources
-    };
+    return { rawAnswer };
   }
 );

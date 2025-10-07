@@ -5,7 +5,6 @@ import {
   contextualWikipediaAnswer,
   type ContextualWikipediaAnswerOutput,
 } from '@/ai/flows/contextual-wikipedia-answer';
-import { revalidatePath } from 'next/cache';
 
 const askSchema = z.object({
   question: z.string().min(1, 'Question cannot be empty.'),
@@ -29,6 +28,9 @@ export async function askAIAction(
   if (!validatedFields.success) {
     return {
       ...prevState,
+      question: '',
+      answer: '',
+      sources: [],
       error:
         validatedFields.error.flatten().fieldErrors.question?.[0] ||
         'Invalid input.',
@@ -52,12 +54,12 @@ export async function askAIAction(
     };
   } catch (error) {
     console.error(error);
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.';
     return {
-      ...prevState,
       question,
       answer: '',
       sources: [],
-      error: 'An unexpected error occurred. Please try again.',
+      error: errorMessage,
     };
   }
 }
