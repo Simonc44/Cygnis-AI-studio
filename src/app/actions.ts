@@ -68,7 +68,7 @@ export async function askAIAction(
 }
 
 // In-memory store for mock API keys. In a real app, use a database.
-let mockApiKeys: { id: string; key: string; createdAt: Date }[] = [
+const mockApiKeys: { id: string; key: string; createdAt: Date }[] = [
   {
     id: '1',
     key: `cgn_live_stable_demo_api_key_012345`,
@@ -86,16 +86,13 @@ export async function getApiKeys() {
 export async function generateApiKeyAction() {
   try {
     const newKey = {
-      id: (mockApiKeys.length + 1).toString(),
-      key: `cgn_live_stable_demo_api_key_012345`,
+      id: (mockApiKeys.length + 2).toString(), // Ensure unique ID
+      key: `cgn_live_stable_${Math.random().toString(36).substr(2, 10)}`,
       createdAt: new Date(),
     };
-    // Avoid adding duplicate keys
-    if (!mockApiKeys.some(key => key.key === newKey.key)) {
-        mockApiKeys.push(newKey);
-    }
+    mockApiKeys.push(newKey);
     revalidatePath('/api-keys');
-    return { success: true, newKey: mockApiKeys.find(k => k.key === newKey.key) };
+    return { success: true, newKey };
   } catch (error) {
     return { success: false, error: 'Failed to generate API key.' };
   }
@@ -103,7 +100,10 @@ export async function generateApiKeyAction() {
 
 export async function revokeApiKeyAction(id: string) {
   try {
-    mockApiKeys = mockApiKeys.filter((key) => key.id !== id);
+    const index = mockApiKeys.findIndex((key) => key.id === id);
+    if (index > 0) { // Do not allow revoking the default key
+      mockApiKeys.splice(index, 1);
+    }
     revalidatePath('/api-keys');
     return { success: true };
   } catch (error) {

@@ -133,20 +133,9 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
       sources.push(match[1]);
     }
 
-    // Extract just the conclusion part for polishing
-    const conclusionIdentifier = "Conclusion:";
-    const conclusionIndex = rawAnswer.lastIndexOf(conclusionIdentifier);
-    let answerToPolish = rawAnswer;
-    if (conclusionIndex !== -1) {
-        answerToPolish = rawAnswer.substring(conclusionIndex + conclusionIdentifier.length);
-    }
-
-    // Clean the answer from bracketed sources for a cleaner final output
-    const cleanedAnswer = answerToPolish.replace(sourceRegex, '').trim();
-
     return {
-      answer: cleanedAnswer,
-      sources: sources.length > 0 ? Array.from(new Set(sources)) : (response.output?.sources || []),
+      answer: rawAnswer, // Pass the raw answer to the next step
+      sources: sources.length > 0 ? Array.from(new Set(sources)) : [],
     };
   }
 );
