@@ -63,13 +63,13 @@ export default function DocumentationPage() {
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Introduction</CardTitle>
           <CardDescription>
-            Welcome to the Cygnis A1 API. Use our powerful RAG model to answer
+            Welcome to the Cygnis AI Studio API. Use our powerful RAG model to answer
             questions with contextual knowledge.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p>
-            The API provides a simple interface to our AI. All you need to do is
+            The API provides a simple interface to our AI model, Cygnis A1. All you need to do is
             send a question, and we&apos;ll return a polished, context-aware
             answer along with its sources.
           </p>

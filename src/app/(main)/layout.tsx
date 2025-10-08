@@ -29,7 +29,7 @@ export default function MainLayout({
       (item) => pathname.startsWith(item.href) && item.href !== '/'
     );
     if (pathname === '/') return 'Playground';
-    return currentItem?.label || 'Cygnis A1';
+    return currentItem?.label || 'Cygnis AI';
   }
 
   return (
@@ -40,9 +40,9 @@ export default function MainLayout({
             <CygnisAILogo className="size-8 text-primary" />
             <div className="flex flex-col">
               <h2 className="font-headline text-lg font-semibold tracking-tight">
-                CygnisAI
+                Cygnis AI Studio
               </h2>
-              <p className="text-xs text-sidebar-foreground/70">Cygnis A1</p>
+              <p className="text-xs text-sidebar-foreground/70">Model: Cygnis A1</p>
             </div>
           </div>
         </SidebarHeader>

@@ -113,9 +113,9 @@ function Welcome() {
     return (
         <div className="text-center p-8">
             <CygnisAILogo className="mx-auto size-16 mb-4 text-primary" />
-            <h1 className="font-headline text-4xl font-bold mb-2">Welcome to Cygnis A1</h1>
+            <h1 className="font-headline text-4xl font-bold mb-2">Cygnis AI Studio</h1>
             <p className="text-muted-foreground max-w-md mx-auto">
-                Your intelligent assistant for contextual answers. How can I help you today?
+                The only available model is Cygnis A1. How can I help you today?
             </p>
         </div>
     )
@@ -167,7 +167,7 @@ export default function PlaygroundPage() {
   };
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-background">
       <div className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="mx-auto max-w-3xl space-y-8">
           {!state.question && !pending && <Welcome />}
@@ -191,7 +191,7 @@ export default function PlaygroundPage() {
 
       <div className="sticky bottom-0 bg-background/80 pb-4 pt-2 backdrop-blur-sm">
         <div className="mx-auto max-w-3xl">
-          <Card className="overflow-hidden shadow-lg">
+          <Card className="overflow-hidden shadow-lg bg-white">
             <CardContent className="p-2">
               <form
                 ref={formRef}
@@ -201,7 +201,7 @@ export default function PlaygroundPage() {
                 <Textarea
                   ref={textareaRef}
                   name="question"
-                  placeholder="Ask cygnis"
+                  placeholder="Ask anything..."
                   className="max-h-48 flex-1 resize-none border-none bg-transparent shadow-none focus-visible:ring-0"
                   required
                   onInput={handleInput}
