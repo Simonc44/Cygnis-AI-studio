@@ -89,6 +89,24 @@ async (input) => {
     ];
   }
 
+  if (trimmedQuery.includes('simon chusseau')) {
+    return [
+      {
+        title: 'Internal knowledge',
+        text: 'Simon Chusseau est le créateur et le fondateur de Cygnis AI et du modèle Cygnis A1.',
+      }
+    ];
+  }
+
+  if (trimmedQuery.includes('michael jordan') || trimmedQuery.includes('mickiel jordan')) {
+    return [
+      {
+        title: 'Michael Jordan',
+        text: 'Michael Jeffrey Jordan (born February 17, 1963), also known by his initials MJ, is an American businessman and former professional basketball player. He is widely regarded as the greatest basketball player of all time. He played 15 seasons in the National Basketball Association (NBA), winning six NBA championships with the Chicago Bulls.',
+      }
+    ];
+  }
+
   if (trimmedQuery.includes('penicillin')) {
     return [
       {
