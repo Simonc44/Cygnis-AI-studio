@@ -87,7 +87,7 @@ async (input) => {
     ];
   }
 
-  if (input.query.toLowerCase().includes('penicillin')) {
+  if (trimmedQuery.includes('penicillin')) {
     return [
       {
         title: 'History of penicillin',
@@ -99,6 +99,16 @@ async (input) => {
       }
     ];
   }
+
+  if (trimmedQuery.includes('mistral')) {
+    return [
+      {
+        title: 'Mistral-7B-v0.1 Benchmark',
+        text: 'Mistral-7B-v0.1 is a performant model for its size. According to the Open LLM Leaderboard, it shows strong results on benchmarks like ARC, HellaSwag, and MMLU, making it a powerful open-weight model. Cygnis A1, on the other hand, is optimized for contextual understanding and tool use in this application.',
+      },
+    ];
+  }
+
   return [
     {
       title: 'Wikipedia',
