@@ -10,12 +10,12 @@ import { Badge } from '@/components/ui/badge';
 
 const API_KEY = "cgn_live_stable_demo_api_key_012345";
 
-const curlExample = `curl -X POST https://your-app-url/api/ask \\
+const curlExample = `curl -X POST https://cygnis-ai-studio.vercel.app/api/ask \\
   -H "Authorization: Bearer ${API_KEY}" \\
   -H "Content-Type: application/json" \\
   -d '{"question": "Who discovered penicillin?"}'`;
 
-const jsExample = `fetch('https://your-app-url/api/ask', {
+const jsExample = `fetch('https://cygnis-ai-studio.vercel.app/api/ask', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer ${API_KEY}',
@@ -31,7 +31,7 @@ const jsExample = `fetch('https://your-app-url/api/ask', {
 
 const pythonExample = `import requests
 
-api_url = "https://your-app-url/api/ask"
+api_url = "https://cygnis-ai-studio.vercel.app/api/ask"
 api_key = "${API_KEY}"
 headers = {
     "Authorization": f"Bearer {api_key}",
