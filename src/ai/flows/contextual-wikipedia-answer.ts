@@ -80,11 +80,11 @@ const retrieveWikipediaExcerpts = ai.defineTool({
 },
 async (input) => {
   const trimmedQuery = input.query.toLowerCase().trim();
-  if (trimmedQuery.includes('who are you') || trimmedQuery.includes('qui es-tu') || trimmedQuery.includes('qui es tu')) {
+  if (trimmedQuery.includes('who are you') || trimmedQuery.includes('qui es-tu') || trimmedQuery.includes('qui es tu') || trimmedQuery.includes('who is your creator')) {
     return [
       {
         title: 'Internal knowledge',
-        text: 'Je suis Cygnis A1, un assistant IA conçu par CygnisAI et entraîné grâce à Google.',
+        text: 'Je suis un grand modèle linguistique, entraîné par Cygnis AI.',
       }
     ];
   }
