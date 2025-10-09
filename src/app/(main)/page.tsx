@@ -52,6 +52,36 @@ function Question({ question }: { question: string }) {
   );
 }
 
+function MarkdownContent({ content }: { content: string }) {
+  const renderContent = () => {
+    // Replace **text** or *text* with <strong>text</strong>
+    const bolded = content.replace(/\*{1,2}(.*?)\*{1,2}/g, '<strong>$1</strong>');
+    
+    // Split by newlines and wrap each line in a paragraph or handle as a list
+    return bolded.split('\n').map((line, index) => {
+      if (line.trim().startsWith('- ') || /^\d+\.\s/.test(line.trim())) {
+        return (
+          <p
+            key={index}
+            className="whitespace-pre-wrap text-base leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: line }}
+          />
+        );
+      }
+      return (
+        <p
+          key={index}
+          className="whitespace-pre-wrap text-base leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: line || ' ' }}
+        />
+      );
+    });
+  };
+
+  return <>{renderContent()}</>;
+}
+
+
 function Answer({
   answer,
   sources,
@@ -66,9 +96,7 @@ function Answer({
       </div>
       <div className="flex-1 space-y-4">
         <div className="rounded-xl border bg-card p-4 text-card-foreground">
-          <p className="whitespace-pre-wrap text-base leading-relaxed">
-            {answer}
-          </p>
+           <MarkdownContent content={answer} />
         </div>
         {sources && sources.length > 0 && (
           <div className="space-y-3">
