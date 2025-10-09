@@ -12,6 +12,9 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import {improveAnswerFluency} from './improve-answer-fluency';
 import { geminiPro } from '@/ai/genkit';
+import wikipedia from 'wikipedia';
+import { JSDOM } from 'jsdom';
+
 
 const ContextualWikipediaAnswerInputSchema = z.object({
   question: z.string().describe('The question to answer using Wikipedia excerpts.'),
@@ -69,7 +72,7 @@ export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswer
 
 const retrieveWikipediaExcerpts = ai.defineTool({
   name: 'retrieveWikipediaExcerpts',
-  description: 'Retrieves relevant excerpts from internal knowledge base.',
+  description: 'Retrieves relevant excerpts from internal knowledge base or Wikipedia.',
   inputSchema: z.object({
     query: z.string().describe('The search query to retrieve information.'),
   }),
@@ -80,6 +83,7 @@ const retrieveWikipediaExcerpts = ai.defineTool({
 },
 async (input) => {
   const trimmedQuery = input.query.toLowerCase().trim();
+  // Internal knowledge overrides Wikipedia
   if (trimmedQuery.includes('who are you') || trimmedQuery.includes('qui es-tu') || trimmedQuery.includes('qui es tu') || trimmedQuery.includes('who is your creator')) {
     return [
       {
@@ -97,49 +101,23 @@ async (input) => {
       }
     ];
   }
-
-  if (trimmedQuery.includes('michael jordan') || trimmedQuery.includes('mickiel jordan')) {
-    return [
-      {
-        title: 'Michael Jordan',
-        text: 'Michael Jeffrey Jordan (born February 17, 1963), also known by his initials MJ, is an American businessman and former professional basketball player. He is widely regarded as the greatest basketball player of all time. He played 15 seasons in the National Basketball Association (NBA), winning six NBA championships with the Chicago Bulls.',
-      }
-    ];
-  }
   
-  if (trimmedQuery.includes('oppenheimer')) {
-    return [
-      {
-        title: 'J. Robert Oppenheimer',
-        text: 'J. Robert Oppenheimer (April 22, 1904 – February 18, 1967) was an American theoretical physicist. He was director of the Los Alamos Laboratory during World War II and is often credited as the "father of the atomic bomb" for his role in the Manhattan Project, the research and development undertaking that created the first nuclear weapons.',
-      }
-    ];
+  try {
+    // Real Wikipedia API call
+    const searchResults = await wikipedia.search(trimmedQuery);
+    if (!searchResults.results.length) {
+      return [];
+    }
+    const page = await wikipedia.page(searchResults.results[0].title);
+    const summary = await page.summary();
+    return [{
+      title: summary.title,
+      text: summary.extract,
+    }];
+  } catch (error) {
+    console.error('Wikipedia API error:', error);
+    return []; // Return empty if Wikipedia fails
   }
-
-  if (trimmedQuery.includes('penicillin')) {
-    return [
-      {
-        title: 'History of penicillin',
-        text: "The discovery of penicillin is attributed to Scottish scientist Alexander Fleming. Fleming recounted that the date of his discovery of penicillin was on the morning of Friday, 28 September 1928. The traditional version of this story is that Fleming returned from a two-week holiday in Suffolk in 1928 and found that a Petri dish containing Staphylococcus aureus which he had accidentally left open was contaminated by a blue-green mould, Penicillium notatum. He observed a halo of inhibited bacterial growth around the mould.",
-      },
-      {
-        title: 'Alexander Fleming',
-        text: 'Sir Alexander Fleming (6 August 1881 – 11 March 1955) was a Scottish physician and microbiologist, best known for his discovery of penicillin in 1928, for which he shared the Nobel Prize in Physiology or Medicine in 145 with Howard Florey and Ernst Boris Chain.',
-      }
-    ];
-  }
-
-  if (trimmedQuery.includes('mistral')) {
-    return [
-      {
-        title: 'Mistral-7B-v0.1 Benchmark',
-        text: 'Mistral-7B-v0.1 is a performant model for its size. According to the Open LLM Leaderboard, it shows strong results on benchmarks like ARC, HellaSwag, and MMLU, making it a powerful open-weight model. Cygnis A1, on the other hand, is optimized for contextual understanding and tool use in this application.',
-      },
-    ];
-  }
-  
-  // By default, return no information, forcing the model to use another tool.
-  return [];
 });
 
 const simpleCalculator = ai.defineTool(
@@ -204,16 +182,67 @@ const getWeather = ai.defineTool(
 const customSearch = ai.defineTool(
     {
         name: 'customSearch',
-        description: 'Searches the web using the "Cygnis" custom search engine. Use this as a last resort if no other tool provides an answer.',
+        description: 'Searches the web for a query and reads the content of the most relevant page. Use this as a last resort if no other tool provides an answer.',
         inputSchema: z.object({
             query: z.string().describe('The query to search on the web.'),
         }),
         outputSchema: z.string(),
     },
     async (input) => {
-        // This is a mock tool. A real implementation would call the Google Custom Search JSON API
-        // with the CX ID 'd013b29e1a5a84cf9' and an API key.
-        return `Simulated search result for "${input.query}": The "Cygnis" search engine found that Genkit is a powerful open-source framework for building AI-powered applications. [Cygnis Search]`;
+        try {
+            // This tool will now perform a real web search and scrape the top result.
+            // Note: This is a simplified implementation. A robust version would handle more complex sites.
+            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(input.query)}`;
+
+            // We need to pretend to be a browser to avoid getting blocked.
+            const searchResponse = await fetch(searchUrl, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                }
+            });
+
+            if (!searchResponse.ok) {
+                return `Failed to perform web search. [Web Search Error]`;
+            }
+
+            const searchHtml = await searchResponse.text();
+            const searchDom = new JSDOM(searchHtml);
+            // Find the first organic search result link.
+            const firstLink = searchDom.window.document.querySelector('div.g a');
+            
+            if (!firstLink || !firstLink.href) {
+                return `No web results found for "${input.query}". [Web Search]`;
+            }
+
+            const pageUrl = firstLink.href;
+
+            // Now fetch and parse the content of the page.
+            const pageResponse = await fetch(pageUrl);
+            if (!pageResponse.ok) {
+                return `Could not access the page at ${pageUrl}. [Web Scraper]`;
+            }
+
+            const pageHtml = await pageResponse.text();
+            const pageDom = new JSDOM(pageHtml);
+            
+            // Remove script and style elements
+            pageDom.window.document.querySelectorAll('script, style').forEach(el => el.remove());
+            
+            // Get text from the body, replacing multiple newlines/spaces
+            let text = pageDom.window.document.body.textContent || "";
+            text = text.replace(/\s\s+/g, ' ').trim();
+
+            if (!text) {
+                return `The page at ${pageUrl} had no readable content. [Web Scraper]`;
+            }
+
+            // Return a snippet of the text
+            return `Content from ${pageUrl}: ${text.substring(0, 2000)}... [${new URL(pageUrl).hostname}]`;
+
+        } catch (error) {
+            console.error('Web search/scrape error:', error);
+            return `An error occurred while searching the web. [Web Search Error]`;
+        }
     }
 );
 
@@ -255,7 +284,7 @@ const contextualWikipediaAnswerPrompt = ai.definePrompt({
   system: `You are Cygnis A1, an expert assistant. Your goal is to provide a comprehensive answer to the user's question by following these steps:
 1.  **Think step-by-step**: First, break down the user's question and create a plan to answer it.
 2.  **Gather Information**: Execute the plan by using your tools in a logical order.
-    - Start by using 'retrieveWikipediaExcerpts' for questions about your identity or general knowledge that might be in your internal knowledge base.
+    - Start by using 'retrieveWikipediaExcerpts' for questions about your identity or general knowledge that might be in your internal knowledge base or on Wikipedia.
     - If the user asks for a calculation, use 'simpleCalculator'.
     - If the user asks you to write computer code, use 'generateCodeSnippet'.
     - If the user asks for the weather, use 'getWeather'.
