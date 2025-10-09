@@ -7,11 +7,13 @@
  * - ImproveAnswerFluencyOutput - The return type for the improveAnswerFluency function.
  */
 
-import {ai, geminiPro} from '@/ai/genkit';
+import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { geminiPro } from '@/ai/genkit';
 
 const ImproveAnswerFluencyInputSchema = z.object({
-  rawAnswer: z.string().describe('The raw, unpolished answer from a previous step, which may include reasoning and a final conclusion.'),
+  question: z.string().describe('The original question asked by the user.'),
+  rawAnswer: z.string().describe('The raw, unpolished data and reasoning steps from a previous step, which may include tool outputs and a conclusion.'),
 });
 export type ImproveAnswerFluencyInput = z.infer<typeof ImproveAnswerFluencyInputSchema>;
 
@@ -33,18 +35,21 @@ const prompt = ai.definePrompt({
   model: geminiPro,
   input: {schema: ImproveAnswerFluencyInputSchema},
   output: {schema: ImproveAnswerFluencyOutputSchema, optional: true},
-  prompt: `You are an expert text editor. Your task is to take a raw text that contains reasoning steps and a final conclusion, and transform it into a single, fluent, and professional answer.
+  prompt: `You are an expert synthesizer and editor. Your task is to take a user's question and the raw data gathered by an AI, and transform it into a single, fluent, and professional final answer.
 
-- **Identify and extract only the final conclusion** from the raw text provided.
-- **Ignore all reasoning steps**, tool outputs, or preliminary thoughts.
-- **Rephrase and polish** the conclusion to be clear, concise, and easy to understand.
-- **Do not include source citations** like [Source Title] in your final output; they will be handled separately.
+- **Synthesize, do not summarize**: Your goal is to construct the best possible answer to the user's original question using the provided raw data.
+- **Ignore all reasoning steps**, tool outputs, or preliminary thoughts from the raw data. Use only the factual information.
+- **Rephrase and polish** the answer to be clear, concise, and easy to understand.
+- **Do not include source citations** like [Source Title] in your final output; they have been handled separately.
 - The output should ONLY be the final, polished answer, without any extra commentary.
 
-Raw Answer:
+Original Question:
+{{{question}}}
+
+Raw Data and Reasoning from AI:
 {{{rawAnswer}}}
 
-Polished Answer:`, 
+Final, Polished Answer:`, 
 });
 
 const improveAnswerFluencyFlow = ai.defineFlow(
@@ -57,8 +62,9 @@ const improveAnswerFluencyFlow = ai.defineFlow(
     const {output} = await prompt(input);
     
     if (!output?.polishedAnswer) {
-        // Fallback in case of empty output
-        return { polishedAnswer: input.rawAnswer };
+        // Fallback in case of empty output: return the raw answer but clean it a bit.
+        const cleanedRawAnswer = input.rawAnswer.replace(/\[([^\]]+)\]/g, '').trim();
+        return { polishedAnswer: cleanedRawAnswer };
     }
     return output;
   }

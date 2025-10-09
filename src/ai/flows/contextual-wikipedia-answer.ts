@@ -8,9 +8,10 @@
  * - ContextualWikipediaAnswerOutput - The return type for the contextualWikipediaAnswer function.
  */
 
-import {ai, geminiPro} from '@/ai/genkit';
+import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import {improveAnswerFluency} from './improve-answer-fluency';
+import { geminiPro } from '@/ai/genkit';
 
 const ContextualWikipediaAnswerInputSchema = z.object({
   question: z.string().describe('The question to answer using Wikipedia excerpts.'),
@@ -24,7 +25,7 @@ const ContextualWikipediaAnswerOutputSchema = z.object({
 export type ContextualWikipediaAnswerOutput = z.infer<typeof ContextualWikipediaAnswerOutputSchema>;
 
 export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswerInput): Promise<ContextualWikipediaAnswerOutput> {
-  // RAG flow
+  // RAG flow - Step 1: Gather raw information
   const rawAnswerResponse = await contextualWikipediaAnswerFlow(input);
   const rawAnswer = rawAnswerResponse?.rawAnswer;
 
@@ -35,8 +36,11 @@ export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswer
     };
   }
 
-  // Fluency polish
-  const polishedAnswerResponse = await improveAnswerFluency({ rawAnswer: rawAnswer });
+  // Fluency polish - Step 2: Synthesize a professional answer from raw data
+  const polishedAnswerResponse = await improveAnswerFluency({
+    question: input.question,
+    rawAnswer: rawAnswer,
+  });
   const polishedAnswer = polishedAnswerResponse?.polishedAnswer;
 
   if (!polishedAnswer) {
@@ -56,11 +60,9 @@ export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswer
     }
   }
 
-  // Clean the polished answer from sources
-  const cleanedAnswer = polishedAnswer.replace(sourceRegex, '').trim();
-
+  // The polished answer should be clean of sources already.
   return {
-    answer: cleanedAnswer,
+    answer: polishedAnswer,
     sources: Array.from(new Set(sources)), // Deduplicate sources
   };
 }
@@ -82,7 +84,7 @@ async (input) => {
     return [
       {
         title: 'Internal knowledge',
-        text: 'I am Cygnis A1, an AI assistant designed by CygnisAI and trained by Google.',
+        text: 'Je suis Cygnis A1, un assistant IA conçu par CygnisAI et entraîné grâce à Google.',
       }
     ];
   }
