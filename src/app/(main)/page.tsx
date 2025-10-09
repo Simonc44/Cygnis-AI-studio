@@ -1,15 +1,15 @@
 'use client';
 
-import { useActionState, useEffect, useRef } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { askAIAction, type AskFormState } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Bot, FileText, Loader2, Send, Sparkles, User, AlertCircle } from 'lucide-react';
+import { Bot, FileText, Loader2, Send, Sparkles, User, AlertCircle, Copy } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { CygnisAILogo } from '@/components/icons';
-import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 
 const initialState: AskFormState = {
   question: '',
@@ -52,29 +52,70 @@ function Question({ question }: { question: string }) {
   );
 }
 
+function CodeBlock({ code }: { code: string }) {
+  const { toast } = useToast();
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    toast({
+      title: 'Code copié !',
+      description: 'Le code a été copié dans le presse-papiers.',
+    });
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  return (
+    <div className="relative rounded-md bg-secondary/50 my-4">
+      <pre className="p-4 pr-12 text-sm overflow-x-auto font-mono">
+        <code>{code}</code>
+      </pre>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-2 right-2 h-7 w-7"
+        onClick={handleCopy}
+      >
+        <Copy className="h-4 w-4" />
+        <span className="sr-only">Copier le code</span>
+      </Button>
+    </div>
+  );
+}
+
 function MarkdownContent({ content }: { content: string }) {
   const renderContent = () => {
-    // Replace **text** or *text* with <strong>text</strong>
-    const bolded = content.replace(/\*{1,2}(.*?)\*{1,2}/g, '<strong>$1</strong>');
-    
-    // Split by newlines and wrap each line in a paragraph or handle as a list
-    return bolded.split('\n').map((line, index) => {
-      if (line.trim().startsWith('- ') || /^\d+\.\s/.test(line.trim())) {
+    const parts = content.split(/(\`\`\`[\s\S]*?\`\`\`)/g);
+
+    return parts.map((part, index) => {
+      if (part.startsWith('```') && part.endsWith('```')) {
+        const code = part.replace(/```(python|javascript|typescript|html|css)?\n/, '').replace(/```$/, '');
+        return <CodeBlock key={index} code={code} />;
+      }
+
+      // Replace **text** or *text* with <strong>text</strong>
+      const bolded = part.replace(/\*{1,2}(.*?)\*{1,2}/g, '<strong>$1</strong>');
+      
+      // Split by newlines and wrap each line in a paragraph or handle as a list
+      return bolded.split('\n').map((line, lineIndex) => {
+        if (line.trim().startsWith('- ') || /^\d+\.\s/.test(line.trim())) {
+          return (
+            <p
+              key={`${index}-${lineIndex}`}
+              className="whitespace-pre-wrap text-base leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: line }}
+            />
+          );
+        }
         return (
           <p
-            key={index}
+            key={`${index}-${lineIndex}`}
             className="whitespace-pre-wrap text-base leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: line }}
+            dangerouslySetInnerHTML={{ __html: line || ' ' }}
           />
         );
-      }
-      return (
-        <p
-          key={index}
-          className="whitespace-pre-wrap text-base leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: line || ' ' }}
-        />
-      );
+      });
     });
   };
 
