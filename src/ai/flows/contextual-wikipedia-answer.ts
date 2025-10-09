@@ -78,11 +78,11 @@ const retrieveWikipediaExcerpts = ai.defineTool({
 },
 async (input) => {
   const trimmedQuery = input.query.toLowerCase().trim();
-  if (trimmedQuery.includes('who are you') || trimmedQuery.includes('what are you')) {
+  if (trimmedQuery.includes('qui es-tu') || trimmedQuery.includes('qui es tu')) {
     return [
       {
         title: 'Internal knowledge',
-        text: 'I am Cygnis A1, an AI assistant designed by CygnisAI and trained by Google.',
+        text: 'Je suis Cygnis A1, un assistant IA conçu par CygnisAI et entraîné grâce à Google.',
       }
     ];
   }
@@ -133,15 +133,70 @@ const simpleCalculator = ai.defineTool(
   }
 );
 
+const generateCodeSnippet = ai.defineTool(
+  {
+      name: 'generateCodeSnippet',
+      description: 'Generates a code snippet in a requested programming language.',
+      inputSchema: z.object({
+          language: z.string().describe('The programming language for the code.'),
+          request: z.string().describe('A description of what the code should do.'),
+      }),
+      outputSchema: z.string(),
+  },
+  async (input) => {
+      // In a real scenario, this could call a more specialized code generation model
+      // or simply be handled by the main model's prompt. For this tool,
+      // we'll format the request to be fulfilled by the main LLM.
+      return `Task: Write a code snippet in ${input.language} that does the following: "${input.request}". The code should be enclosed in a markdown block.`;
+  }
+);
+
+const getWeather = ai.defineTool(
+  {
+      name: 'getWeather',
+      description: 'Provides the current weather for a specified location.',
+      inputSchema: z.object({
+          city: z.string().describe('The city for which to get the weather.'),
+      }),
+      outputSchema: z.string(),
+  },
+  async (input) => {
+      // This is a mock tool. A real implementation would call a weather API.
+      return `The weather in ${input.city} is sunny with a temperature of 25°C. [Météo Simulée]`;
+  }
+);
+
+const customSearch = ai.defineTool(
+  {
+      name: 'customSearch',
+      description: 'Searches the web using the "Cygnis" custom search engine.',
+      inputSchema: z.object({
+          query: z.string().describe('The query to search on the web.'),
+      }),
+      outputSchema: z.string(),
+  },
+  async (input) => {
+      // This is a mock tool. A real implementation would call the Google Custom Search JSON API
+      // with the CX ID 'd013b29e1a5a84cf9' and an API key.
+      return `Simulated search result for "${input.query}": The "Cygnis" search engine found that Genkit is a powerful open-source framework for building AI-powered applications. [Cygnis Search]`;
+  }
+);
+
 const contextualWikipediaAnswerPrompt = ai.definePrompt({
   name: 'contextualWikipediaAnswerPrompt',
   model: geminiPro,
-  tools: [retrieveWikipediaExcerpts, simpleCalculator],
+  tools: [retrieveWikipediaExcerpts, simpleCalculator, generateCodeSnippet, getWeather, customSearch],
   system: `You are Cygnis A1, an expert assistant. Your goal is to provide a comprehensive answer to the user's question by following these steps:
-1.  Use your tools to gather information. Use 'retrieveWikipediaExcerpts' for knowledge-based questions and 'simpleCalculator' for math questions.
+1.  Use your tools to gather information. 
+    - Use 'retrieveWikipediaExcerpts' for general knowledge-based questions.
+    - Use 'simpleCalculator' for math questions.
+    - Use 'generateCodeSnippet' when asked to write computer code.
+    - Use 'getWeather' for questions about the weather.
+    - Use 'customSearch' for any other web search queries.
 2.  First, think about the steps you will take to answer the question.
 3.  Then, write out the final answer based on the information you gathered.
-4.  Crucially, you MUST embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the 'retrieveWikipediaExcerpts' tool.`,
+4.  Crucially, you MUST embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the tools.
+5.  When generating code, make sure to wrap it in markdown fences (e.g., \`\`\`python ... \`\`\`).`,
   prompt: `Question: {{{question}}}`,
 });
 
