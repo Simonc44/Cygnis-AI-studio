@@ -190,10 +190,41 @@ const customSearch = ai.defineTool(
     }
 );
 
+const searchYoutube = ai.defineTool(
+  {
+      name: 'searchYoutube',
+      description: 'Searches for a YouTube video.',
+      inputSchema: z.object({
+          query: z.string().describe('The search query for the YouTube video.'),
+      }),
+      outputSchema: z.string(),
+  },
+  async (input) => {
+      // This is a mock tool. A real implementation would call the YouTube Data API.
+      return `Found video: 'Genkit: The Future of AI Development' at https://www.youtube.com/watch?v=dQw4w9WgXcQ [YouTube Search]`;
+  }
+);
+
+const createImage = ai.defineTool(
+  {
+      name: 'createImage',
+      description: 'Creates an image from a text description. The user interface cannot display images, so just confirm that the image has been created.',
+      inputSchema: z.object({
+          prompt: z.string().describe('A description of the image to create.'),
+      }),
+      outputSchema: z.string(),
+  },
+  async (input) => {
+      // In a real scenario, this would call ai.generate({ model: 'googleai/imagen-2' ... })
+      // and return a data URI. For this demo, we confirm creation.
+      return `An image based on the prompt "${input.prompt}" has been created. [Image Generation]`;
+  }
+);
+
 const contextualWikipediaAnswerPrompt = ai.definePrompt({
   name: 'contextualWikipediaAnswerPrompt',
   model: geminiPro,
-  tools: [retrieveWikipediaExcerpts, simpleCalculator, generateCodeSnippet, getWeather, customSearch],
+  tools: [retrieveWikipediaExcerpts, simpleCalculator, generateCodeSnippet, getWeather, customSearch, searchYoutube, createImage],
   system: `You are Cygnis A1, an expert assistant. Your goal is to provide a comprehensive answer to the user's question by following these steps:
 1.  **Think step-by-step**: First, break down the user's question and create a plan to answer it.
 2.  **Gather Information**: Execute the plan by using your tools in a logical order.
@@ -201,10 +232,13 @@ const contextualWikipediaAnswerPrompt = ai.definePrompt({
     - If the user asks for a calculation, use 'simpleCalculator'.
     - If the user asks you to write computer code, use 'generateCodeSnippet'.
     - If the user asks for the weather, use 'getWeather'.
+    - If the user asks to find a video, use 'searchYoutube'.
+    - If the user asks you to create an image, use 'createImage'.
     - If, and only if, none of the other tools can answer the question, use 'customSearch' to look on the web.
 3.  **Synthesize the Answer**: Based on the information you gathered, formulate a clear and comprehensive final answer.
 4.  **Cite Your Sources**: Crucially, you MUST embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the tools.
-5.  When generating code, make sure to wrap it in markdown fences (e.g., \`\`\`python ... \`\`\`).`,
+5.  When generating code, make sure to wrap it in markdown fences (e.g., \`\`\`python ... \`\`\`).
+6.  When asked to create a table, use Markdown table format.`,
   prompt: `Question: {{{question}}}`,
 });
 
