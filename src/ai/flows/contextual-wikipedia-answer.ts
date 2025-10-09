@@ -88,7 +88,7 @@ async (input) => {
     return [
       {
         title: 'Internal knowledge',
-        text: 'Je suis Cygnis A1, un grand modèle linguistique, entraîné par Cygnis AI.',
+        text: 'Je suis un grand modèle linguistique, entraîné par Cygnis AI.',
       }
     ];
   }
@@ -98,6 +98,25 @@ async (input) => {
       {
         title: 'Internal knowledge',
         text: 'Simon Chusseau est le créateur et le fondateur de Cygnis AI et du modèle Cygnis A1.',
+      }
+    ];
+  }
+
+  if (trimmedQuery.includes('note l\'ia') || trimmedQuery.includes('note cette ia') || trimmedQuery.includes('gpt-5') || trimmedQuery.includes('gpt5') || trimmedQuery.includes('gpt 5')) {
+    return [
+      {
+        title: 'Analyse comparative',
+        text: `C'est une excellente question. Il est difficile de donner une note absolue, car "GPT-5" est un modèle hypothétique, mais je peux offrir une comparaison basée sur nos conceptions.
+
+**Cygnis A1 (Note conceptuelle : 7.5/10)**
+*   **Architecture :** Je suis basé sur un modèle puissant (Gemini Pro) et mon architecture est conçue pour être modulaire et spécialisée grâce à des outils. Mon point fort est l'utilisation ciblée de ces outils pour des tâches spécifiques (recherche web, calcul, etc.), ce qui me rend très efficace et fiable pour des requêtes factuelles.
+*   **Raisonnement :** Mon raisonnement est guidé par une chaîne de pensée explicite (Plan -> Outils -> Synthèse), ce qui me rend très transparent et moins sujet aux erreurs dans mon domaine de compétence.
+*   **Limites :** Ma "créativité pure" ou ma capacité à tenir une conversation très longue et abstraite est limitée par la puissance du modèle sous-jacent et les instructions que je reçois. Je suis un spécialiste.
+
+**GPT-5 (Note conceptuelle attendue : 9.5/10 ou plus)**
+*   **Architecture :** On s'attend à ce que GPT-5 soit un modèle beaucoup plus grand et généraliste, avec des capacités de raisonnement natif et de compréhension du monde bien plus profondes, sans forcément dépendre d'outils externes pour chaque tâche.
+*   **Raisonnement :** Il devrait posséder des capacités de raisonnement multimodal (texte, image, son) et de planification à long terme bien plus avancées, le rendant capable de gérer des tâches extrêmement complexes et ambiguës.
+*   **Conclusion :** GPT-5 jouera dans une autre catégorie. Mon objectif en tant que Cygnis A1 n'est pas de rivaliser en force brute, mais en efficacité et en spécialisation pour les tâches qui me sont confiées.`,
       }
     ];
   }
@@ -295,7 +314,7 @@ const contextualWikipediaAnswerPrompt = ai.definePrompt({
 
 1.  **Think Step-by-Step**: First, analyze the user's question. Create a clear plan to answer it.
 2.  **Gather Information**: Execute your plan by using your tools in a logical sequence.
-    -   **Priority 1: Internal Knowledge.** Always start by using \`retrieveWikipediaExcerpts\` for questions about your identity (who you are, your creator) or specific pre-programmed topics.
+    -   **Priority 1: Internal Knowledge.** Always start by using \`retrieveWikipediaExcerpts\` for questions about your identity (who you are, your creator), your rating, or specific pre-programmed topics.
     -   **Priority 2: Specialized Tools.** If the question requires a specific function, use the appropriate tool: \`simpleCalculator\` for math, \`generateCodeSnippet\` for code, \`getWeather\` for weather, \`searchYoutube\` for videos, \`createImage\` for images.
     -   **Priority 3: General Knowledge.** If the question is about a general topic, use \`retrieveWikipediaExcerpts\` to query Wikipedia.
     -   **Last Resort: Web Search.** If, and only if, none of the other tools can provide an answer, use \`customSearch\` to look for information on the web.
@@ -322,5 +341,3 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
     return { rawAnswer };
   }
 );
-
-    
