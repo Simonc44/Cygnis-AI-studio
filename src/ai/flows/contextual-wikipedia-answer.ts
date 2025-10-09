@@ -67,22 +67,22 @@ export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswer
 
 const retrieveWikipediaExcerpts = ai.defineTool({
   name: 'retrieveWikipediaExcerpts',
-  description: 'Retrieves relevant excerpts from Wikipedia based on the query.',
+  description: 'Retrieves relevant excerpts from internal knowledge base.',
   inputSchema: z.object({
-    query: z.string().describe('The search query to retrieve Wikipedia excerpts.'),
+    query: z.string().describe('The search query to retrieve information.'),
   }),
   outputSchema: z.array(z.object({
-    title: z.string().describe('The title of the Wikipedia page.'),
-    text: z.string().describe('The excerpt from the Wikipedia page.'),
+    title: z.string().describe('The title of the knowledge base article.'),
+    text: z.string().describe('The excerpt from the knowledge base.'),
   })),
 },
 async (input) => {
   const trimmedQuery = input.query.toLowerCase().trim();
-  if (trimmedQuery.includes('qui es-tu') || trimmedQuery.includes('qui es tu')) {
+  if (trimmedQuery.includes('who are you') || trimmedQuery.includes('qui es-tu') || trimmedQuery.includes('qui es tu')) {
     return [
       {
         title: 'Internal knowledge',
-        text: 'Je suis Cygnis A1, un assistant IA conçu par CygnisAI et entraîné grâce à Google.',
+        text: 'I am Cygnis A1, an AI assistant designed by CygnisAI and trained by Google.',
       }
     ];
   }
@@ -108,13 +108,9 @@ async (input) => {
       },
     ];
   }
-
-  return [
-    {
-      title: 'Wikipedia',
-      text: 'No relevant information found for the query.',
-    },
-  ];
+  
+  // By default, return no information, forcing the model to use another tool.
+  return [];
 });
 
 const simpleCalculator = ai.defineTool(
@@ -179,7 +175,7 @@ const getWeather = ai.defineTool(
 const customSearch = ai.defineTool(
     {
         name: 'customSearch',
-        description: 'Searches the web using the "Cygnis" custom search engine.',
+        description: 'Searches the web using the "Cygnis" custom search engine. Use this as a last resort if no other tool provides an answer.',
         inputSchema: z.object({
             query: z.string().describe('The query to search on the web.'),
         }),
@@ -197,13 +193,13 @@ const contextualWikipediaAnswerPrompt = ai.definePrompt({
   model: geminiPro,
   tools: [retrieveWikipediaExcerpts, simpleCalculator, generateCodeSnippet, getWeather, customSearch],
   system: `You are Cygnis A1, an expert assistant. Your goal is to provide a comprehensive answer to the user's question by following these steps:
-1.  **Think step-by-step**: First, break down the user's question and create a plan to answer it. Consider which tools will be necessary.
-2.  **Gather Information**: Execute the plan by using your tools to gather the necessary information.
-    - Use 'retrieveWikipediaExcerpts' for general knowledge-based questions.
-    - Use 'simpleCalculator' for math questions.
-    - Use 'generateCodeSnippet' when asked to write computer code.
-    - Use 'getWeather' for questions about the weather.
-    - Use 'customSearch' for any other web search queries.
+1.  **Think step-by-step**: First, break down the user's question and create a plan to answer it.
+2.  **Gather Information**: Execute the plan by using your tools in a logical order.
+    - Start by using 'retrieveWikipediaExcerpts' for questions about your identity or general knowledge that might be in your internal knowledge base.
+    - If the user asks for a calculation, use 'simpleCalculator'.
+    - If the user asks you to write computer code, use 'generateCodeSnippet'.
+    - If the user asks for the weather, use 'getWeather'.
+    - If, and only if, none of the other tools can answer the question, use 'customSearch' to look on the web.
 3.  **Synthesize the Answer**: Based on the information you gathered, formulate a clear and comprehensive final answer.
 4.  **Cite Your Sources**: Crucially, you MUST embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the tools.
 5.  When generating code, make sure to wrap it in markdown fences (e.g., \`\`\`python ... \`\`\`).`,

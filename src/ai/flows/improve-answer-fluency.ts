@@ -33,12 +33,13 @@ const prompt = ai.definePrompt({
   model: geminiPro,
   input: {schema: ImproveAnswerFluencyInputSchema},
   output: {schema: ImproveAnswerFluencyOutputSchema, optional: true},
-  prompt: `You are an expert text editor and polisher. Your task is to take a raw text that contains reasoning steps and a conclusion, and transform it into a single, fluent, and professional answer.
+  prompt: `You are an expert text editor. Your task is to take a raw text that contains reasoning steps and a final conclusion, and transform it into a single, fluent, and professional answer.
 
-- Extract the final conclusion from the raw text.
-- Rephrase and refine the conclusion to be clear, concise, and easy to understand.
-- Do NOT include the original reasoning steps in your final output.
-- The output should only be the final, polished answer.
+- **Identify and extract only the final conclusion** from the raw text provided.
+- **Ignore all reasoning steps**, tool outputs, or preliminary thoughts.
+- **Rephrase and polish** the conclusion to be clear, concise, and easy to understand.
+- **Do not include source citations** like [Source Title] in your final output; they will be handled separately.
+- The output should ONLY be the final, polished answer, without any extra commentary.
 
 Raw Answer:
 {{{rawAnswer}}}
