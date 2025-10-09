@@ -106,6 +106,15 @@ async (input) => {
       }
     ];
   }
+  
+  if (trimmedQuery.includes('oppenheimer')) {
+    return [
+      {
+        title: 'J. Robert Oppenheimer',
+        text: 'J. Robert Oppenheimer (April 22, 1904 – February 18, 1967) was an American theoretical physicist. He was director of the Los Alamos Laboratory during World War II and is often credited as the "father of the atomic bomb" for his role in the Manhattan Project, the research and development undertaking that created the first nuclear weapons.',
+      }
+    ];
+  }
 
   if (trimmedQuery.includes('penicillin')) {
     return [
