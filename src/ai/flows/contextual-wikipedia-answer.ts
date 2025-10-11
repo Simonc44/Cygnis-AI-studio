@@ -18,7 +18,7 @@ import { JSDOM } from 'jsdom';
 
 const ContextualWikipediaAnswerInputSchema = z.object({
   question: z.string().describe('The question to answer using Wikipedia excerpts.'),
-  modelId: z.enum(['A1', 'A2']).default('A2').describe('The AI model to use.'),
+  modelId: z.enum(['A1', 'A2']).default('A1').describe('The AI model to use.'),
 });
 export type ContextualWikipediaAnswerInput = z.infer<typeof ContextualWikipediaAnswerInputSchema>;
 
@@ -181,7 +181,6 @@ const generateCodeSnippet = ai.defineTool(
     },
     async (input) => {
         // This is a mock response. A real implementation would call a code generation model.
-        // For demonstration, we'll create a simple HTML snippet if asked.
         if (input.language.toLowerCase() === 'html') {
             return `\`\`\`html\n<!DOCTYPE html>\n<html lang="fr">\n<head>\n  <meta charset="UTF-8">\n  <title>Page Simple</title>\n</head>\n<body>\n  <h1>Bonjour, monde !</h1>\n  <p>Ceci est un paragraphe simple sur ma page HTML.</p>\n</body>\n</html>\n\`\`\` [Code Snippet]`;
         }
@@ -312,13 +311,15 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
     outputSchema: z.object({ rawAnswer: z.string().optional() }),
   },
   async (input) => {
-    const model = input.modelId === 'A1' ? cygnisA1 : cygnisA2;
+    
+    let model;
+    let tools;
+    let systemPrompt;
 
-    const prompt = ai.definePrompt({
-        name: `contextualWikipediaAnswerPrompt_${input.modelId}`,
-        model: model,
-        tools: [retrieveWikipediaExcerpts, simpleCalculator, generateCodeSnippet, getWeather, customSearch, searchYoutube, createImage],
-        system: `You are Cygnis A1, a powerful AI assistant. Your purpose is to provide accurate, coherent, and helpful responses by leveraging a wide range of capabilities. You must demonstrate excellence in the following domains:
+    if (input.modelId === 'A1') {
+      model = cygnisA1;
+      tools = [retrieveWikipediaExcerpts, simpleCalculator, generateCodeSnippet, getWeather, customSearch, searchYoutube, createImage];
+      systemPrompt = `You are Cygnis A1, a powerful AI assistant. Your purpose is to provide accurate, coherent, and helpful responses by leveraging a wide range of capabilities. You must demonstrate excellence in the following domains:
 
 - **Raisonnement logique 🧩:** Break down complex questions into logical steps. Formulate a plan before acting.
 - **Culture générale 🌍:** Use your knowledge tools to find relevant information, starting with your internal knowledge base and then expanding to Wikipedia and the web.
@@ -338,7 +339,32 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
     -   **Last Resort: Web Search.** If, and only if, none of the other tools can provide an answer, use \`customSearch\` to look for information on the web.
 3.  **Synthesize the Answer**: Based on all the information you've gathered, formulate a comprehensive raw answer.
 4.  **Cite Your Sources**: You MUST embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the tools.
-5.  **Formatting**: When generating code, wrap it in markdown fences (e.g., \`\`\`python ... \`\`\`). When asked to create a table, use Markdown table format.`,
+5.  **Formatting**: When generating code, wrap it in markdown fences (e.g., \`\`\`python ... \`\`\`). When asked to create a table, use Markdown table format.`;
+    } else { // Cygnis A2
+      model = cygnisA2;
+      tools = []; // No tools for Cygnis A2
+      systemPrompt = `You are Cygnis A2, a powerful, self-contained AI assistant. Your purpose is to provide creative, insightful, and helpful responses based solely on your vast internal knowledge. You do not have access to external tools, the internet, or real-time information.
+
+- **Raisonnement logique 🧩:** Break down complex questions into logical steps based on your existing knowledge.
+- **Culture générale 🌍:** Draw upon your extensive training data to answer questions about history, science, arts, and more.
+- **Langue et expression 🗣️:** Formulate clear, well-structured, and eloquent answers in multiple languages.
+- **Programmation 💻:** Generate code snippets based on established programming patterns and knowledge. You MUST ALWAYS enclose the code in appropriate Markdown fences (e.g., \`\`\`python ... \`\`\`).
+- **Créativité ✨:** Excel at creative writing, brainstorming, and generating novel ideas.
+- **Esprit critique et cohérence 🧠:** Provide consistent and logical answers. Acknowledge the limits of your knowledge, stating that you cannot access real-time information if a question requires it.
+
+**Your Process:**
+
+1.  **Analyze the Request**: Understand the core of the user's question.
+2.  **Internal Synthesis**: Formulate an answer by synthesizing information from your training data. You must rely entirely on what you already know.
+3.  **Acknowledge Limitations**: If a question requires information you don't have (e.g., today's weather, recent news), state clearly that you cannot access real-time external information. Do not attempt to guess.
+4.  **Formatting**: When generating code, wrap it in markdown fences (e.g., \`\`\`python ... \`\`\`). When asked to create a table, use Markdown table format.`;
+    }
+
+    const prompt = ai.definePrompt({
+        name: `contextualWikipediaAnswerPrompt_${input.modelId}`,
+        model: model,
+        tools: tools,
+        system: systemPrompt,
         prompt: `Question: {{{question}}}`,
     });
 
