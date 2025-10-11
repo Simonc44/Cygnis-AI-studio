@@ -197,7 +197,7 @@ export default function PlaygroundPage() {
   const { pending } = useFormStatus();
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [selectedModel, setSelectedModel] = useState('A2');
+  const [selectedModel, setSelectedModel] = useState('A1');
 
   useEffect(() => {
     if (!formRef.current) return;
