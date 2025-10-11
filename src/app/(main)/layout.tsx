@@ -42,7 +42,7 @@ export default function MainLayout({
               <h2 className="font-headline text-lg font-semibold tracking-tight">
                 Cygnis AI Studio
               </h2>
-              <p className="text-xs text-sidebar-foreground/70">Model: Cygnis A1</p>
+              <p className="text-xs text-sidebar-foreground/70">Model: Cygnis A2</p>
             </div>
           </div>
         </SidebarHeader>

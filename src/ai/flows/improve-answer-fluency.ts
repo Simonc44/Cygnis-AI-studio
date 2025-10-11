@@ -9,7 +9,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { geminiPro } from '@/ai/genkit';
+import { cygnisA2 } from '@/ai/genkit';
 
 const ImproveAnswerFluencyInputSchema = z.object({
   question: z.string().describe('The original question asked by the user.'),
@@ -32,7 +32,7 @@ export async function improveAnswerFluency(input: ImproveAnswerFluencyInput): Pr
 
 const prompt = ai.definePrompt({
   name: 'improveAnswerFluencyPrompt',
-  model: geminiPro,
+  model: cygnisA2,
   input: {schema: ImproveAnswerFluencyInputSchema},
   output: {schema: ImproveAnswerFluencyOutputSchema, optional: true},
   prompt: `You are an expert synthesizer and editor. Your task is to take a user's question and the raw data gathered by an AI, and transform it into a single, fluent, and professional final answer.

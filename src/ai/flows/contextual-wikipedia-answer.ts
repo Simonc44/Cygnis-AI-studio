@@ -11,7 +11,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import {improveAnswerFluency} from './improve-answer-fluency';
-import { geminiPro } from '@/ai/genkit';
+import { cygnisA2 } from '@/ai/genkit';
 import wikipedia from 'wikipedia';
 import { JSDOM } from 'jsdom';
 
@@ -305,7 +305,7 @@ const createImage = ai.defineTool(
 
 const contextualWikipediaAnswerPrompt = ai.definePrompt({
   name: 'contextualWikipediaAnswerPrompt',
-  model: geminiPro,
+  model: cygnisA2,
   tools: [retrieveWikipediaExcerpts, simpleCalculator, generateCodeSnippet, getWeather, customSearch, searchYoutube, createImage],
   system: `You are Cygnis A1, a powerful AI assistant. Your purpose is to provide accurate, coherent, and helpful responses by leveraging a wide range of capabilities. You must demonstrate excellence in the following domains:
 
