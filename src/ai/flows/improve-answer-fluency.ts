@@ -9,12 +9,12 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { cygnisA1, cygnisA2 } from '@/ai/genkit';
+import { cygnisA1 } from '@/ai/genkit';
 
 const ImproveAnswerFluencyInputSchema = z.object({
   question: z.string().describe('The original question asked by the user.'),
   rawAnswer: z.string().describe('The raw, unpolished data and reasoning steps from a previous step, which may include tool outputs and a conclusion.'),
-  modelId: z.enum(['A1', 'A2']).default('A2').describe('The AI model to use.'),
+  modelId: z.enum(['A1']).default('A1').describe('The AI model to use.'),
 });
 export type ImproveAnswerFluencyInput = z.infer<typeof ImproveAnswerFluencyInputSchema>;
 
@@ -38,7 +38,7 @@ const improveAnswerFluencyFlow = ai.defineFlow(
     outputSchema: ImproveAnswerFluencyOutputSchema,
   },
   async input => {
-    const model = input.modelId === 'A1' ? cygnisA1 : cygnisA2;
+    const model = cygnisA1; // Always use A1 as A2 is disabled
 
     const prompt = ai.definePrompt({
       name: `improveAnswerFluencyPrompt_${input.modelId}`,

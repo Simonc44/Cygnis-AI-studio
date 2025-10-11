@@ -12,6 +12,12 @@ import { CygnisAILogo } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const initialState: AskFormState = {
   question: '',
@@ -243,6 +249,7 @@ export default function PlaygroundPage() {
   };
 
   return (
+    <TooltipProvider>
     <div className="flex h-full flex-col bg-background">
       <div className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="mx-auto max-w-3xl space-y-8">
@@ -278,11 +285,20 @@ export default function PlaygroundPage() {
                     <BrainCircuit className="size-5 text-primary" />
                     <span className="font-medium">Cygnis A1</span>
                   </Label>
-                  <Label htmlFor="cygnis-a2" className="flex items-center gap-3 cursor-pointer rounded-full border px-4 py-2 has-[:checked]:bg-primary/10 has-[:checked]:border-primary/50 transition-colors">
-                    <RadioGroupItem value="A2" id="cygnis-a2" />
-                    <Rocket className="size-5 text-primary" />
-                    <span className="font-medium">Cygnis A2</span>
-                  </Label>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Label htmlFor="cygnis-a2" className="flex items-center gap-3 cursor-not-allowed rounded-full border px-4 py-2 opacity-50">
+                        <RadioGroupItem value="A2" id="cygnis-a2" disabled />
+                        <Rocket className="size-5 text-muted-foreground" />
+                        <span className="font-medium text-muted-foreground">Cygnis A2</span>
+                      </Label>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Cygnis A2 est un modèle local non disponible dans cette démo.</p>
+                    </TooltipContent>
+                  </Tooltip>
+
                 </RadioGroup>
                 <input type="hidden" name="modelId" value={selectedModel} />
             </div>
@@ -310,5 +326,6 @@ export default function PlaygroundPage() {
         </div>
       </div>
     </div>
+    </TooltipProvider>
   );
 }

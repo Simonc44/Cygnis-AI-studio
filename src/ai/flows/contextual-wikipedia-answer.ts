@@ -11,14 +11,14 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import {improveAnswerFluency} from './improve-answer-fluency';
-import { cygnisA1, cygnisA2 } from '@/ai/genkit';
+import { cygnisA1 } from '@/ai/genkit';
 import wikipedia from 'wikipedia';
 import { JSDOM } from 'jsdom';
 
 
 const ContextualWikipediaAnswerInputSchema = z.object({
   question: z.string().describe('The question to answer using Wikipedia excerpts.'),
-  modelId: z.enum(['A1', 'A2']).default('A1').describe('The AI model to use.'),
+  modelId: z.enum(['A1']).default('A1').describe('The AI model to use.'),
 });
 export type ContextualWikipediaAnswerInput = z.infer<typeof ContextualWikipediaAnswerInputSchema>;
 
@@ -93,6 +93,15 @@ async (input) => {
         text: 'Je suis un grand modèle linguistique, entraîné par Cygnis AI.',
       }
     ];
+  }
+
+  if (trimmedQuery.includes('cygnis a2')) {
+      return [
+          {
+              title: 'Information sur Cygnis A2',
+              text: 'Le modèle Cygnis A2 est conçu pour être un modèle personnalisé, téléchargé et exécuté localement via Firebase ML. Cette architecture n’est pas compatible avec cette application web, c’est pourquoi seul le modèle Cygnis A1 (basé sur Gemini) est actuellement disponible.',
+          }
+      ];
   }
 
   if (trimmedQuery.includes('simon chusseau')) {
@@ -340,24 +349,8 @@ const contextualWikipediaAnswerFlow = ai.defineFlow(
 3.  **Synthesize the Answer**: Based on all the information you've gathered, formulate a comprehensive raw answer.
 4.  **Cite Your Sources**: You MUST embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the tools.
 5.  **Formatting**: When generating code, wrap it in markdown fences (e.g., \`\`\`python ... \`\`\`). When asked to create a table, use Markdown table format.`;
-    } else { // Cygnis A2
-      model = cygnisA2;
-      tools = []; // No tools for Cygnis A2
-      systemPrompt = `You are Cygnis A2, a powerful, self-contained AI assistant. Your purpose is to provide creative, insightful, and helpful responses based solely on your vast internal knowledge. You do not have access to external tools, the internet, or real-time information.
-
-- **Raisonnement logique 🧩:** Break down complex questions into logical steps based on your existing knowledge.
-- **Culture générale 🌍:** Draw upon your extensive training data to answer questions about history, science, arts, and more.
-- **Langue et expression 🗣️:** Formulate clear, well-structured, and eloquent answers in multiple languages.
-- **Programmation 💻:** Generate code snippets based on established programming patterns and knowledge. You MUST ALWAYS enclose the code in appropriate Markdown fences (e.g., \`\`\`python ... \`\`\`).
-- **Créativité ✨:** Excel at creative writing, brainstorming, and generating novel ideas.
-- **Esprit critique et cohérence 🧠:** Provide consistent and logical answers. Acknowledge the limits of your knowledge, stating that you cannot access real-time information if a question requires it.
-
-**Your Process:**
-
-1.  **Analyze the Request**: Understand the core of the user's question.
-2.  **Internal Synthesis**: Formulate an answer by synthesizing information from your training data. You must rely entirely on what you already know.
-3.  **Acknowledge Limitations**: If a question requires information you don't have (e.g., today's weather, recent news), state clearly that you cannot access real-time external information. Do not attempt to guess.
-4.  **Formatting**: When generating code, wrap it in markdown fences (e.g., \`\`\`python ... \`\`\`). When asked to create a table, use Markdown table format.`;
+    } else { // This case should not be hit as Cygnis A2 is disabled.
+      return { rawAnswer: "Cygnis A2 is not available." };
     }
 
     const prompt = ai.definePrompt({

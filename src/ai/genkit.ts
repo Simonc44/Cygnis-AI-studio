@@ -6,4 +6,6 @@ export const ai = genkit({
 });
 
 export const cygnisA1 = googleAI.model('gemini-2.5-flash');
-export const cygnisA2 = googleAI.model('gemini-pro');
+// Cygnis A2 has been removed as it was intended to be a locally downloaded model,
+// which is not supported in this web application architecture.
+// export const cygnisA2 = googleAI.model('gemini-pro');

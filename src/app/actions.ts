@@ -3,13 +3,12 @@
 import { z } from 'zod';
 import {
   contextualWikipediaAnswer,
-  type ContextualWikipediaAnswerInput,
   type ContextualWikipediaAnswerOutput,
 } from '@/ai/flows/contextual-wikipedia-answer';
 
 const askSchema = z.object({
   question: z.string().min(1, 'Question cannot be empty.'),
-  modelId: z.enum(['A1', 'A2']),
+  modelId: z.enum(['A1']), // Only A1 is available now
 });
 
 export type AskFormState = {
