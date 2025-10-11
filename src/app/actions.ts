@@ -3,11 +3,13 @@
 import { z } from 'zod';
 import {
   contextualWikipediaAnswer,
+  type ContextualWikipediaAnswerInput,
   type ContextualWikipediaAnswerOutput,
 } from '@/ai/flows/contextual-wikipedia-answer';
 
 const askSchema = z.object({
   question: z.string().min(1, 'Question cannot be empty.'),
+  modelId: z.enum(['A1', 'A2']),
 });
 
 export type AskFormState = {
@@ -23,12 +25,13 @@ export async function askAIAction(
 ): Promise<AskFormState> {
   const validatedFields = askSchema.safeParse({
     question: formData.get('question'),
+    modelId: formData.get('modelId'),
   });
 
   if (!validatedFields.success) {
     return {
       ...prevState,
-      question: '',
+      question: (formData.get('question') as string) || '',
       answer: '',
       sources: [],
       error:
@@ -37,10 +40,10 @@ export async function askAIAction(
     };
   }
 
-  const question = validatedFields.data.question;
+  const { question, modelId } = validatedFields.data;
 
   try {
-    const result = await contextualWikipediaAnswer({ question });
+    const result = await contextualWikipediaAnswer({ question, modelId });
 
     if (!result.answer) {
       throw new Error('Failed to get a contextual answer.');

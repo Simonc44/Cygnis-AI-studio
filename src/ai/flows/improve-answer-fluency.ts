@@ -9,11 +9,12 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { cygnisA2 } from '@/ai/genkit';
+import { cygnisA1, cygnisA2 } from '@/ai/genkit';
 
 const ImproveAnswerFluencyInputSchema = z.object({
   question: z.string().describe('The original question asked by the user.'),
   rawAnswer: z.string().describe('The raw, unpolished data and reasoning steps from a previous step, which may include tool outputs and a conclusion.'),
+  modelId: z.enum(['A1', 'A2']).default('A2').describe('The AI model to use.'),
 });
 export type ImproveAnswerFluencyInput = z.infer<typeof ImproveAnswerFluencyInputSchema>;
 
@@ -30,12 +31,21 @@ export async function improveAnswerFluency(input: ImproveAnswerFluencyInput): Pr
   return result;
 }
 
-const prompt = ai.definePrompt({
-  name: 'improveAnswerFluencyPrompt',
-  model: cygnisA2,
-  input: {schema: ImproveAnswerFluencyInputSchema},
-  output: {schema: ImproveAnswerFluencyOutputSchema, optional: true},
-  prompt: `You are an expert synthesizer and editor. Your task is to take a user's question and the raw data gathered by an AI, and transform it into a single, fluent, and professional final answer.
+const improveAnswerFluencyFlow = ai.defineFlow(
+  {
+    name: 'improveAnswerFluencyFlow',
+    inputSchema: ImproveAnswerFluencyInputSchema,
+    outputSchema: ImproveAnswerFluencyOutputSchema,
+  },
+  async input => {
+    const model = input.modelId === 'A1' ? cygnisA1 : cygnisA2;
+
+    const prompt = ai.definePrompt({
+      name: `improveAnswerFluencyPrompt_${input.modelId}`,
+      model: model,
+      input: {schema: ImproveAnswerFluencyInputSchema},
+      output: {schema: ImproveAnswerFluencyOutputSchema, optional: true},
+      prompt: `You are an expert synthesizer and editor. Your task is to take a user's question and the raw data gathered by an AI, and transform it into a single, fluent, and professional final answer.
 
 - **Synthesize, do not summarize**: Your goal is to construct the best possible answer to the user's original question using the provided raw data.
 - **Ignore all reasoning steps**, tool outputs, or preliminary thoughts from the raw data. Use only the factual information.
@@ -50,15 +60,8 @@ Raw Data and Reasoning from AI:
 {{{rawAnswer}}}
 
 Final, Polished Answer:`, 
-});
-
-const improveAnswerFluencyFlow = ai.defineFlow(
-  {
-    name: 'improveAnswerFluencyFlow',
-    inputSchema: ImproveAnswerFluencyInputSchema,
-    outputSchema: ImproveAnswerFluencyOutputSchema,
-  },
-  async input => {
+    });
+    
     const {output} = await prompt(input);
     
     if (!output?.polishedAnswer) {

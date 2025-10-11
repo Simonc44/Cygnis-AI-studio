@@ -6,10 +6,12 @@ import { askAIAction, type AskFormState } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Bot, FileText, Loader2, Send, Sparkles, User, AlertCircle, Copy } from 'lucide-react';
+import { Bot, FileText, Loader2, Send, Sparkles, User, AlertCircle, Copy, BrainCircuit, Rocket } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { CygnisAILogo } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 const initialState: AskFormState = {
   question: '',
@@ -184,7 +186,7 @@ function Welcome() {
             <CygnisAILogo className="mx-auto size-16 mb-4 text-primary" />
             <h1 className="font-headline text-4xl font-bold mb-2">Cygnis AI Studio</h1>
             <p className="text-muted-foreground max-w-md mx-auto">
-                The only available model is Cygnis A1. How can I help you today?
+                Choisissez un modèle ci-dessous et posez une question pour commencer.
             </p>
         </div>
     )
@@ -195,6 +197,7 @@ export default function PlaygroundPage() {
   const { pending } = useFormStatus();
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [selectedModel, setSelectedModel] = useState('A2');
 
   useEffect(() => {
     if (!formRef.current) return;
@@ -212,7 +215,11 @@ export default function PlaygroundPage() {
 
   useEffect(() => {
     if (!pending && formRef.current) {
+      const currentQuestion = (formRef.current.elements.namedItem('question') as HTMLTextAreaElement)?.value;
       formRef.current.reset();
+      if (textareaRef.current) {
+          textareaRef.current.value = currentQuestion;
+      }
       handleInput();
     }
      // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -260,27 +267,46 @@ export default function PlaygroundPage() {
 
       <div className="sticky bottom-0 bg-background/80 pb-4 pt-2 backdrop-blur-sm">
         <div className="mx-auto max-w-3xl">
-          <Card className="overflow-hidden shadow-lg bg-white">
-            <CardContent className="p-2">
-              <form
-                ref={formRef}
-                action={formAction}
-                className="flex w-full items-end gap-2"
-              >
-                <Textarea
-                  ref={textareaRef}
-                  name="question"
-                  placeholder="Ask anything..."
-                  className="max-h-48 flex-1 resize-none border-none bg-transparent shadow-none focus-visible:ring-0"
-                  required
-                  onInput={handleInput}
-                  onKeyDown={handleKeyDown}
-                  rows={1}
-                />
-                <SubmitButton />
-              </form>
-            </CardContent>
-          </Card>
+          <form
+            ref={formRef}
+            action={formAction}
+          >
+            <div className="mb-2 px-2">
+                <RadioGroup value={selectedModel} onValueChange={setSelectedModel} className="flex justify-center gap-4">
+                  <Label htmlFor="cygnis-a1" className="flex items-center gap-3 cursor-pointer rounded-full border px-4 py-2 has-[:checked]:bg-primary/10 has-[:checked]:border-primary/50 transition-colors">
+                    <RadioGroupItem value="A1" id="cygnis-a1" />
+                    <BrainCircuit className="size-5 text-primary" />
+                    <span className="font-medium">Cygnis A1</span>
+                  </Label>
+                  <Label htmlFor="cygnis-a2" className="flex items-center gap-3 cursor-pointer rounded-full border px-4 py-2 has-[:checked]:bg-primary/10 has-[:checked]:border-primary/50 transition-colors">
+                    <RadioGroupItem value="A2" id="cygnis-a2" />
+                    <Rocket className="size-5 text-primary" />
+                    <span className="font-medium">Cygnis A2</span>
+                  </Label>
+                </RadioGroup>
+                <input type="hidden" name="modelId" value={selectedModel} />
+            </div>
+
+            <Card className="overflow-hidden shadow-lg bg-white">
+              <CardContent className="p-2">
+                <div
+                  className="flex w-full items-end gap-2"
+                >
+                  <Textarea
+                    ref={textareaRef}
+                    name="question"
+                    placeholder="Ask anything..."
+                    className="max-h-48 flex-1 resize-none border-none bg-transparent shadow-none focus-visible:ring-0"
+                    required
+                    onInput={handleInput}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                  />
+                  <SubmitButton />
+                </div>
+              </CardContent>
+            </Card>
+          </form>
         </div>
       </div>
     </div>

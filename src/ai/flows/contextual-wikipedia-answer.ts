@@ -11,13 +11,14 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import {improveAnswerFluency} from './improve-answer-fluency';
-import { cygnisA2 } from '@/ai/genkit';
+import { cygnisA1, cygnisA2 } from '@/ai/genkit';
 import wikipedia from 'wikipedia';
 import { JSDOM } from 'jsdom';
 
 
 const ContextualWikipediaAnswerInputSchema = z.object({
   question: z.string().describe('The question to answer using Wikipedia excerpts.'),
+  modelId: z.enum(['A1', 'A2']).default('A2').describe('The AI model to use.'),
 });
 export type ContextualWikipediaAnswerInput = z.infer<typeof ContextualWikipediaAnswerInputSchema>;
 
@@ -43,6 +44,7 @@ export async function contextualWikipediaAnswer(input: ContextualWikipediaAnswer
   const polishedAnswerResponse = await improveAnswerFluency({
     question: input.question,
     rawAnswer: rawAnswer,
+    modelId: input.modelId,
   });
   const polishedAnswer = polishedAnswerResponse?.polishedAnswer;
 
@@ -303,11 +305,20 @@ const createImage = ai.defineTool(
   }
 );
 
-const contextualWikipediaAnswerPrompt = ai.definePrompt({
-  name: 'contextualWikipediaAnswerPrompt',
-  model: cygnisA2,
-  tools: [retrieveWikipediaExcerpts, simpleCalculator, generateCodeSnippet, getWeather, customSearch, searchYoutube, createImage],
-  system: `You are Cygnis A1, a powerful AI assistant. Your purpose is to provide accurate, coherent, and helpful responses by leveraging a wide range of capabilities. You must demonstrate excellence in the following domains:
+const contextualWikipediaAnswerFlow = ai.defineFlow(
+  {
+    name: 'contextualWikipediaAnswerFlow',
+    inputSchema: ContextualWikipediaAnswerInputSchema,
+    outputSchema: z.object({ rawAnswer: z.string().optional() }),
+  },
+  async (input) => {
+    const model = input.modelId === 'A1' ? cygnisA1 : cygnisA2;
+
+    const prompt = ai.definePrompt({
+        name: `contextualWikipediaAnswerPrompt_${input.modelId}`,
+        model: model,
+        tools: [retrieveWikipediaExcerpts, simpleCalculator, generateCodeSnippet, getWeather, customSearch, searchYoutube, createImage],
+        system: `You are Cygnis A1, a powerful AI assistant. Your purpose is to provide accurate, coherent, and helpful responses by leveraging a wide range of capabilities. You must demonstrate excellence in the following domains:
 
 - **Raisonnement logique 🧩:** Break down complex questions into logical steps. Formulate a plan before acting.
 - **Culture générale 🌍:** Use your knowledge tools to find relevant information, starting with your internal knowledge base and then expanding to Wikipedia and the web.
@@ -328,17 +339,10 @@ const contextualWikipediaAnswerPrompt = ai.definePrompt({
 3.  **Synthesize the Answer**: Based on all the information you've gathered, formulate a comprehensive raw answer.
 4.  **Cite Your Sources**: You MUST embed the source titles in brackets like [Source Title] at the end of the relevant sentence. The source titles are provided by the tools.
 5.  **Formatting**: When generating code, wrap it in markdown fences (e.g., \`\`\`python ... \`\`\`). When asked to create a table, use Markdown table format.`,
-  prompt: `Question: {{{question}}}`,
-});
+        prompt: `Question: {{{question}}}`,
+    });
 
-const contextualWikipediaAnswerFlow = ai.defineFlow(
-  {
-    name: 'contextualWikipediaAnswerFlow',
-    inputSchema: ContextualWikipediaAnswerInputSchema,
-    outputSchema: z.object({ rawAnswer: z.string().optional() }),
-  },
-  async (input) => {
-    const response = await contextualWikipediaAnswerPrompt(input);
+    const response = await prompt({ question: input.question });
     const rawAnswer = response.text;
 
     if (!rawAnswer) {
