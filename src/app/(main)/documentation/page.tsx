@@ -70,7 +70,7 @@ export default function DocumentationPage() {
         <CardContent>
           <p>
             The API provides a simple interface to our AI model, Cygnis A1. All you need to do is
-            send a question, and we&apos;ll return a polished, context-aware
+            send a question, and we'll return a polished, context-aware
             answer along with its sources.
           </p>
         </CardContent>
