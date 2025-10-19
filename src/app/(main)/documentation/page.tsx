@@ -88,7 +88,7 @@ export default function DocumentationPage() {
         <CardContent className="space-y-4">
           <p>
             All API requests must be authenticated with an API key. For this demo,
-            please use the static key provided below.
+            please use the static key provided below. There is no page to generate new keys; this key is for all users of this demonstration application.
           </p>
           <p>
             Include your API key in the `Authorization` header with the `Bearer`
