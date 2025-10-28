@@ -8,17 +8,17 @@ import {
 import CodeBlock from './components/code-block';
 import { Badge } from '@/components/ui/badge';
 
-const API_KEY = "cgn_live_stable_demo_api_key_012345";
+const API_KEY_PLACEHOLDER = 'YOUR_CYGNIS_API_KEY';
 
 const curlExample = `curl -X POST https://cygnis-ai-studio.vercel.app/api/ask \\
-  -H "Authorization: Bearer ${API_KEY}" \\
+  -H "Authorization: Bearer ${API_KEY_PLACEHOLDER}" \\
   -H "Content-Type: application/json" \\
   -d '{"question": "Who discovered penicillin?"}'`;
 
 const jsExample = `fetch('https://cygnis-ai-studio.vercel.app/api/ask', {
   method: 'POST',
   headers: {
-    'Authorization': 'Bearer ${API_KEY}',
+    'Authorization': 'Bearer ${API_KEY_PLACEHOLDER}',
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
@@ -29,10 +29,13 @@ const jsExample = `fetch('https://cygnis-ai-studio.vercel.app/api/ask', {
 .then(data => console.log(data))
 .catch(error => console.error('Error:', error));`;
 
-const pythonExample = `import requests
+const pythonExample = \`import requests
+import os
 
 api_url = "https://cygnis-ai-studio.vercel.app/api/ask"
-api_key = "${API_KEY}"
+# It's recommended to load the key from environment variables
+api_key = os.getenv("CYGNIS_API_KEY", "${API_KEY_PLACEHOLDER}")
+
 headers = {
     "Authorization": f"Bearer {api_key}",
     "Content-Type": "application/json"
@@ -46,15 +49,15 @@ response = requests.post(api_url, headers=headers, json=data)
 if response.status_code == 200:
     print(response.json())
 else:
-    print(f"Error: {response.status_code}", response.text)`;
+    print(f"Error: {response.status_code}", response.text)\`;
 
-const responseExample = `{
+const responseExample = \`{
   "answer": "The discovery of penicillin is attributed to Scottish scientist Alexander Fleming in 1928.",
   "sources": [
     "History of penicillin",
     "Alexander Fleming"
   ]
-}`;
+}\`;
 
 export default function DocumentationPage() {
   return (
@@ -87,15 +90,14 @@ export default function DocumentationPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p>
-            All API requests must be authenticated with an API key. For this demo,
-            please use the static key provided below. There is no page to generate new keys; this key is for all users of this demonstration application.
+            All API requests must be authenticated with an API key. This key should be stored securely and not be exposed publicly. For this demo, your API key is located in the \`.env\` file in the root of your project.
           </p>
           <p>
-            Include your API key in the `Authorization` header with the `Bearer`
+            Include your API key in the \`Authorization\` header with the \`Bearer\`
             scheme.
           </p>
           <pre className="mt-2 rounded-md bg-secondary p-4 text-sm">
-            <code>Authorization: Bearer ${API_KEY}</code>
+            <code>Authorization: Bearer YOUR_CYGNIS_API_KEY</code>
           </pre>
         </CardContent>
       </Card>
@@ -120,7 +122,7 @@ export default function DocumentationPage() {
             <div className="mt-2 w-full overflow-hidden rounded-md border">
               <div className="p-4">
                 <code className="font-mono text-sm">
-                  {`{ "question": "string" }`}
+                  {'{ "question": "string" }'}
                 </code>
               </div>
             </div>

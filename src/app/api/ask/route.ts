@@ -3,7 +3,7 @@ import {
   contextualWikipediaAnswer,
 } from '@/ai/flows/contextual-wikipedia-answer';
 
-const API_KEY = 'cgn_live_stable_demo_api_key_012345';
+const API_KEY = process.env.CYGNIS_API_KEY;
 
 export async function POST(request: Request) {
   const authHeader = request.headers.get('Authorization');
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const contextualAnswer = await contextualWikipediaAnswer({ question });
+    const contextualAnswer = await contextualWikipediaAnswer({ question, modelId: 'A1' });
 
     return NextResponse.json({
       answer: contextualAnswer.answer,

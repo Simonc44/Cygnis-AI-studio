@@ -5,7 +5,13 @@ async function testApi() {
 
     // Replace with your actual deployed URL if needed
     const api_url = "http://localhost:9002/api/ask";
-    const api_key = "cgn_live_stable_demo_api_key_012345";
+    const api_key = process.env.CYGNIS_API_KEY;
+
+    if (!api_key) {
+        console.error("\n❌ API Test Failed: CYGNIS_API_KEY is not defined in your .env file.");
+        return;
+    }
+
     const headers = {
         "Authorization": `Bearer ${api_key}`,
         "Content-Type": "application/json"
