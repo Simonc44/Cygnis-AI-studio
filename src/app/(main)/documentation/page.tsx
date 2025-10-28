@@ -29,7 +29,7 @@ const jsExample = `fetch('https://cygnis-ai-studio.vercel.app/api/ask', {
 .then(data => console.log(data))
 .catch(error => console.error('Error:', error));`;
 
-const pythonExample = \`import requests
+const pythonExample = `import requests
 import os
 
 api_url = "https://cygnis-ai-studio.vercel.app/api/ask"
@@ -49,15 +49,15 @@ response = requests.post(api_url, headers=headers, json=data)
 if response.status_code == 200:
     print(response.json())
 else:
-    print(f"Error: {response.status_code}", response.text)\`;
+    print(f"Error: {response.status_code}", response.text)`;
 
-const responseExample = \`{
+const responseExample = `{
   "answer": "The discovery of penicillin is attributed to Scottish scientist Alexander Fleming in 1928.",
   "sources": [
     "History of penicillin",
     "Alexander Fleming"
   ]
-}\`;
+}`;
 
 export default function DocumentationPage() {
   return (
