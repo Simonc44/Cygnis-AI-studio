@@ -1,5 +1,7 @@
 # Cygnis AI Studio
 
+![All Rights Reserved](https://img.shields.io/badge/license-All%20Rights%20Reserved-red)
+
 Bienvenue sur Cygnis AI Studio, une application web complète servant de terrain de jeu et de plateforme de déploiement pour les modèles d'IA Cygnis. Ce projet a été conçu pour être à la fois une interface de test interactive et une API robuste pour des intégrations externes.
 
 ## ✨ Fonctionnalités
