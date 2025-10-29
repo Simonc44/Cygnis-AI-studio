@@ -66,5 +66,4 @@ npm run test:api
 
 ## ⚖️ Licence
 
-Tous droits réservés.
-Propriétaire : Simon Chusseau
+© 2025 Simon Chusseau. Tous droits réservés.
